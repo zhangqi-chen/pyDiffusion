@@ -5,11 +5,9 @@ from scipy.interpolate import splev
 
 def profileplot(diffprofile):
     "Plot diffusion profile"
-    plt.figure('DiffProfile')
-    plt.plot(diffprofile.dis, diffprofile.X, 'b-', lw=2)
-    for If in diffprofile.If:
-        Ifid = np.where(diffprofile.dis == If)[0]
-        plt.plot(diffprofile.dis[Ifid], diffprofile.X[Ifid], 'r-', lw=2)
+    dis, X = diffprofile.dis, diffprofile.X
+    plt.figure('Diffusion Profile')
+    plt.plot(dis, X, 'b-', lw=2)
     plt.xlabel('Distance (micron)')
     plt.ylabel('Mole fraction')
     plt.show()
@@ -17,7 +15,7 @@ def profileplot(diffprofile):
 
 def DCplot(diffsys):
     "Plot diffusion coefficients"
-    plt.figure('DiffSystem')
+    plt.figure('Diffusion Coefficients')
     for i in range(diffsys.Np):
         Xf = np.linspace(diffsys.Xr[i, 0], diffsys.Xr[i, 1], 100)
         Df = np.exp(splev(Xf, diffsys.Dfunc[i]))

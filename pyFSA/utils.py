@@ -27,7 +27,7 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
 
     """
     dis, X = profile.dis, profile.X
-    fD = diffsys.Dfunc
+    Xr, fD = diffsys.Xr, diffsys.Dfunc
     nmin, nmax = n
     dmin = dis[-1]/nmax/2
 
@@ -42,9 +42,9 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     # Create universel D function fDC
     Xf, Df = np.array([]), np.array([])
     for i in range(len(fD)):
-        Xnew = np.linspace(fD[i][0][0], fD[i][0][-1], 20)
+        Xnew = np.linspace(Xr[i, 0], Xr[i, 1], 20)
         Xf = np.append(Xf, Xnew)
-        Df = np.append(Df, np.exp(splev(Xf, fD[i])))
+        Df = np.append(Df, np.exp(splev(Xnew, fD[i])))
     fDC = splrep(Xf, np.log(Df), k=2)
 
     # Meshing
@@ -70,7 +70,6 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
 def step(dis, matano, diffsys):
     """
     Create a step profile at the matano plane.
-    Output a step profile for simulation.
 
     Parameters
     ----------
@@ -80,7 +79,7 @@ def step(dis, matano, diffsys):
         Matano plane location (micron).
     diffsys : pyFSA.diffusion.DiffSystem
         The diffusion system information for initial setups before simulation.
-    
+
     Returns
     -------
     profile : pyFSA.diffusion.DiffProfile
@@ -93,14 +92,12 @@ def step(dis, matano, diffsys):
     if Np == 1:
         return DiffProfile(dis, X)
     else:
-        If = np.zeros(Np+1)
-        d1, d2 = 0.5*(dis[1]-dis[0]), 0.5*(dis[-1]-dis[-2])
-        If[0], If[-1] = dis[0]-d1, dis[-1]+d2
+        If = [0]*(Np-1)
         Ip = np.where(X == XR)[0][0]
         d = dis[Ip] - dis[Ip-1]
-        for i in range(1, Np):
-            If[i] = dis[Ip-1] + d/(Np+1)*i
-        return DiffProfile(dis, X, If=If)
+        for i in range(Np-1):
+            If[i] = dis[Ip-1] + d/(Np+1)*(i+1)
+        return DiffProfile(dis, X, If)
 
 
 def Dmodel(profile, time, Xlim=[]):
@@ -139,8 +136,7 @@ def disXcheck(dis, X):
 
 def SF(profile, time, Xlim=[]):
     dis, X = profile.dis, profile.X
-    Xlim = [X[0], X[-1]] if Xlim == [] else Xlim
-    XL, XR = Xlim
+    XL, XR = X[0], X[-1] if Xlim == [] else Xlim
     Y1 = (X-XL)/(XR-XL)
     Y2 = 1-Y1
     dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
@@ -167,6 +163,5 @@ def matanocalc(profile, Xlim=[]):
         Matano Plane location.
     """
     dis, X = profile.dis, profile.X
-    Xlim = [X[0], X[-1]] if Xlim == [] else Xlim
-    XL, XR = Xlim
+    XL, XR = X[0], X[-1] if Xlim == [] else Xlim
     return (np.trapz(X, dis)-dis[-1]*XR+dis[0]*XL)/(XL-XR)
