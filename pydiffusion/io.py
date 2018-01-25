@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.interpolate import splev
-from pyFSA.diffusion import DiffProfile, DiffSystem
+from pydiffusion.diffusion import DiffProfile, DiffSystem
 
 
 def save_csv(name, profile=None, diffsys=None):

@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import splev, splrep, UnivariateSpline
-from pyFSA.diffusion import DiffProfile, DiffSystem
+from pydiffusion.diffusion import DiffProfile, DiffSystem
 
 
 def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
@@ -9,10 +9,10 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
 
     Parameters
     ----------
-    profile : pyFSA.diffusion.DiffProfile
+    profile : pydiffusion.diffusion.DiffProfile
         The profile meshing is based on. It should be similar to final simulated profile.
         e.g. Smoothed experimental profile.
-    diffsys : pyFSA.diffusion.DiffSystem
+    diffsys : pydiffusion.diffusion.DiffSystem
         The diffusion coefficients for simulation.
     n : list
         meshing number range, default = [400, 500]
@@ -77,13 +77,13 @@ def step(dis, matano, diffsys):
         Distance information.
     matano : float
         Matano plane location (micron).
-    diffsys : pyFSA.diffusion.DiffSystem
+    diffsys : pydiffusion.diffusion.DiffSystem
         The diffusion system information for initial setups before simulation.
 
     Returns
     -------
-    profile : pyFSA.diffusion.DiffProfile
-        Step profile can be used for input of pyFSA.simulation.mphSim
+    profile : pydiffusion.diffusion.DiffProfile
+        Step profile can be used for input of pydiffusion.simulation.mphSim
     """
     Np = diffsys.Np
     XL, XR = diffsys.Xr[0][0], diffsys.Xr[-1][1]
@@ -152,7 +152,7 @@ def matanocalc(profile, Xlim=[]):
 
     Parameters
     ----------
-    profile : pyFSA.diffusion.DiffProfile
+    profile : pydiffusion.diffusion.DiffProfile
         Diffusion Profile.
     Xlim : list
         The left and right end concentration of the profile.

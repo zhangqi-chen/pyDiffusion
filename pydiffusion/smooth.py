@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
-from pyFSA.utils import DiffProfile
+from pydiffusion.utils import DiffProfile
 
 
 def movingradius(dis, X, r):
@@ -30,7 +30,7 @@ def phasesmooth(dis, X):
         zmid = np.where((dis >= zm[0]) & (dis <= zm[1]))[0]
         plt.cla()
         plt.plot(dis[zmid], Xsm[zmid], 'bo')
-        plt.show()
+        plt.draw()
         sm = True
         while sm:
             Xsmn = np.copy(Xsm[zmid])
@@ -50,14 +50,14 @@ def phasesmooth(dis, X):
                 Xsmn = movingradius(dis[zmid], Xsmn, r)
             plt.cla()
             plt.plot(dis[zmid], Xsm[zmid], 'bo', dis[zmid], Xsmn, 'ro')
-            plt.show()
+            plt.draw()
             ipt = input('Redo this smooth? (y/[n])')
             sm = True if 'y' in ipt or 'Y' in ipt else False
             if not sm:
                 Xsm[zmid] = Xsmn
         plt.cla()
         plt.plot(dis, X, 'bo', dis, Xsm, 'ro')
-        plt.show()
+        plt.draw()
         ipt = input('Further smooth for this phase? (y/[n])')
         smoo = True if 'y' in ipt or 'Y' in ipt else False
     return Xsm
@@ -67,9 +67,7 @@ def datasmooth(dis, X, interface=[], n=2000):
     dis, X = np.array(dis), np.array(X)
     assert len(dis) == len(X), 'Nonequal length of distance and composition data'
     Np = len(interface)+1
-    If = np.zeros(Np+1)
-    If[1:-1] = interface
-    If[0], If[-1] = dis[0]-0.5, dis[-1]+0.5
+    If = interface
     Ip = [0]*(Np+1)
     disn, Xn = dis.copy(), X.copy()
     for i in range(Np):

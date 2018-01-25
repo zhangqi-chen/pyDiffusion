@@ -8,9 +8,9 @@ def sphSim(profile, diffsys, time):
 
     Parameters
     ----------
-    profile : pyFSA.diffusion.DiffProfile
+    profile : pydiffusion.diffusion.DiffProfile
         Initial diffusion profile before simulation.
-    diffsys : pyFSA.diffusion.DiffSystem
+    diffsys : pydiffusion.diffusion.DiffSystem
         Diffusion coefficients.
     time : float
         time in seconds.
@@ -42,9 +42,9 @@ def mphSim(profile, diffsys, time):
 
     Parameters
     ----------
-    profile : pyFSA.diffusion.DiffProfile
+    profile : pydiffusion.diffusion.DiffProfile
         Initial diffusion profile before simulation.
-    diffsys : pyFSA.diffusion.DiffSystem
+    diffsys : pydiffusion.diffusion.DiffSystem
         Diffusion coefficients.
     time : float
         time in seconds.
