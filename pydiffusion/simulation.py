@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.interpolate import splev, splrep
+from pydiffusion import DiffProfile
 
 
 def sphSim(profile, diffsys, time):
@@ -14,8 +15,13 @@ def sphSim(profile, diffsys, time):
         Diffusion coefficients.
     time : float
         time in seconds.
+
+    Returns
+    -------
+    profile : pydiffusion.diffusion.DiffProfile
+        Simulated diffusion profile
     """
-    dis, Xs = profile.dis/1e6, profile.X
+    dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
     fD = diffsys.Dfunc
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
@@ -34,6 +40,7 @@ def sphSim(profile, diffsys, time):
         if np.mod(m, 3e4) == 0:
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
     print('Simulation Complete')
+    return DiffProfile(dis, Xs)
 
 
 def mphSim(profile, diffsys, time):
@@ -48,9 +55,14 @@ def mphSim(profile, diffsys, time):
         Diffusion coefficients.
     time : float
         time in seconds.
+
+    Returns
+    -------
+    profile : pydiffusion.diffusion.DiffProfile
+        Simulated diffusion profile
     """
-    dis, Xs = profile.dis/1e6, profile.X
-    Ip, If = profile.Ip, profile.If/1e6
+    dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
+    Ip, If = profile.Ip.copy(), profile.If.copy()/1e6
     Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
@@ -163,4 +175,5 @@ def mphSim(profile, diffsys, time):
     for i in list(range(Np-1, 0, -1)):
         dis = np.insert(dis, Ip[i], [If[i], If[i]])
         Xs = np.insert(Xs, Ip[i], [Xr[i-1, 1], Xr[i, 0]])
-    profile.dis, profile.X = dis*1e6, Xs
+
+    return DiffProfile(dis, Xs, If[1:-1])
