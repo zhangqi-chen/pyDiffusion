@@ -40,7 +40,7 @@ def sphSim(profile, diffsys, time):
         if np.mod(m, 3e4) == 0:
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
     print('Simulation Complete')
-    return DiffProfile(dis, Xs)
+    return DiffProfile(dis*1e6, Xs)
 
 
 def mphSim(profile, diffsys, time):
@@ -176,4 +176,4 @@ def mphSim(profile, diffsys, time):
         dis = np.insert(dis, Ip[i], [If[i], If[i]])
         Xs = np.insert(Xs, Ip[i], [Xr[i-1, 1], Xr[i, 0]])
 
-    return DiffProfile(dis, Xs, If[1:-1])
+    return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6)
