@@ -47,18 +47,26 @@ def sphSim(profile, diffsys, time, output=True):
     return DiffProfile(dis*1e6, Xs)
 
 
-def mphSim(profile, diffsys, time, output=True):
+def mphSim(profile, diffsys, time, liquid=0, output=True):
     """
-    Multiple-Phase Diffusion Simulation.
+    Single/Multiple-Phase Diffusion Simulation. Liquid phase can be attached
+    at left or right end. For thin film simulation, please set up the
+    interface nearby the end in the initial profile.
 
     Parameters
     ----------
     profile : pydiffusion.diffusion.DiffProfile
-        Initial diffusion profile before simulation.
+        Initial profile before simulation.
     diffsys : pydiffusion.diffusion.DiffSystem
         Diffusion coefficients.
     time : float
         time in seconds.
+    liquid : 1, 0 or -1, optional
+        Liquid phase provide infinite mass flux during simulation, can only be
+        attached at left or right end.
+        0 : No liquid phase attached.
+        -1 : Liquid phase attached at left.
+        1 : Liquid phase attached at right.
     output : boolean, optional
         Print simulation progress, default = True.
 
@@ -69,7 +77,14 @@ def mphSim(profile, diffsys, time, output=True):
     """
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
     Ip, If = profile.Ip.copy(), profile.If.copy()/1e6
-    Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
+    Np, Xr = diffsys.Np, diffsys.Xr.copy()
+    fD = [f for f in diffsys.Dfunc]
+
+    if len(Ip) != Np+1:
+        raise ValueError('Number of interfaces mismatches between profile and diffusion system')
+    if liquid not in [-1, 0, 1]:
+        raise ValueError('liquid can only be 0 1 or -1')
+
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
     Jf, DCs = np.zeros(len(dis)), np.zeros(len(dis))
@@ -105,8 +120,10 @@ def mphSim(profile, diffsys, time, output=True):
         # vIf calculation, dt limited by 'No interface passing by'
         for i in range(1, Np):
             vIf[i] = (JIf[i, 1]-JIf[i, 0])/(Xr[i, 0]-Xr[i-1, 1])
-            dt = min(dt, abs(min(d[Ip[i]-2:Ip[i]+1])/vIf[i]))
-            if i >= 2 and vIf[i-1] > vIf[i]:
+            vid = [Ip[i]-2] if Ip[i] > 1 else []
+            vid += [Ip[i]] if Ip[i] < len(dis) else []
+            dt = min(dt, abs(min(d[vid]/vIf[i])))
+            if i > 1 and vIf[i-1] > vIf[i]:
                 dt = min(dt, (If[i]-If[i-1])/(vIf[i-1]-vIf[i])/2)
 
         # dt limited by grid nearby interfaces cannot exceed solubility limit
@@ -125,6 +142,13 @@ def mphSim(profile, diffsys, time, output=True):
                     dt = min(dt, (Xs[Ip[i]]-Xr[i, 0])/(Jf[Ip[i]]-JIf[i, 1])*dj[Ip[i]-1])
 
         dt = time-t if t+dt > time else dt*0.95
+
+        # If first or last phase will be consumed
+        if If[1] < dis[1] and vIf[1] < 0:
+            dt = min(dt, (dis[0]-If[1])/vIf[1])
+        elif If[-2] > dis[-2] and vIf[-2] > 0:
+            dt = min(dt, (dis[-1]-If[-2])/vIf[-2])
+
         t += dt
         m += 1
 
@@ -144,14 +168,35 @@ def mphSim(profile, diffsys, time, output=True):
                     Xs[Ipr] -= dt*(Jf[Ipr]-Jf[Ipr-1])/dj[Ipr-1]
 
         # Composition changes at first & last grid
-        Xs[0] -= Jf[0]/d[0]*dt*2
-        Xs[-1] += Jf[-1]/d[-1]*dt*2
+        # If there is liquid phase attached, composition unchanged.
+        if liquid != -1:
+            Xs[0] -= Jf[0]/d[0]*dt*2
+        if liquid != 1:
+            Xs[-1] += Jf[-1]/d[-1]*dt*2
 
-        # Interface motion
-        If += vIf*dt
+        # If one phase comsumed, delete this phase
+        if If[1]+vIf[1]*dt <= dis[0]:
+            Xs[0] = Xr[1, 0]
+            Np -= 1
+            Xr, If, Ip, fD = Xr[1:], If[1:], Ip[1:], fD[1:]
+            Ip[0] = 0
+            JIf = np.zeros([Np+1, 2])
+            vIf = np.zeros(Np+1)
+            if output:
+                print('First phase consumed, %i phase(s) left, time = %.3f hrs' % (Np, t/3600))
+        elif If[-2]*vIf[-2]*dt >= dis[-1]:
+            Xs[-1] = Xr[-2, 1]
+            Np -= 1
+            Xr, If, Ip, fD = Xr[:-1], If[:-1], Ip[:-1], fD[:-1]
+            Ip[-1] = len(dis)
+            JIf = np.zeros([Np+1, 2])
+            vIf = np.zeros(Np+1)
+            if output:
+                print('Last phase consumed, %i phase(s) left, time = %.3f hrs' % (Np, t/3600))
 
         # Interface move across one grid, passed grid has value change
         for i in range(1, Np):
+            If[i] += vIf[i]*dt
             if If[i] < dis[Ip[i]-1]:
                 Ip[i] -= 1
                 if If[i+1] < dis[Ip[i]+1]:
@@ -248,7 +293,8 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-
                 diffsys_error = DCbias(diffsys, X, deltaD)
                 profile_error = mphSim(profile_init, diffsys_error, time, False)
                 error_sim = error_profile(profile_error, profile_exp)
-                print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)' % (X, n_sim, deltaD, error_sim, error_cap))
+                print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'
+                      % (X, n_sim, deltaD, error_sim, error_cap))
 
                 if abs(error_sim-error_cap) < error_cap*accuracy:
                     profile_at_X += [profile_error]
