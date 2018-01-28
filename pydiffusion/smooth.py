@@ -7,7 +7,8 @@ from pydiffusion import DiffProfile
 def movingradius(dis, X, r):
     """
     Data smooth using moving average within a radius range
-    The first and last data point is unchanged, data at d is averaged by data in the range of (d-r, d+r)
+    The first and last data point is unchanged, data at d is averaged by data
+    in the range of (d-r, d+r)
 
     """
     dmin, dmax = dis[0], dis[-1]
@@ -79,7 +80,8 @@ def phasesmooth(dis, X):
 
 def datasmooth(dis, X, interface=[], n=2000):
     """
-    Data smooth of diffusion profile. The functions use moving radius method on each phase.
+    Data smooth of diffusion profile. The functions use moving radius method
+    on each phase.
 
     Parameters
     ----------

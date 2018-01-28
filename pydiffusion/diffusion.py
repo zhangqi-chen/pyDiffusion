@@ -21,8 +21,8 @@ class DiffProfile(object):
         assert len(dis) == len(X), 'length of dis and X is not equal'
         self.dis = np.array(dis)
         self.X = np.array(X)
-        d1, d2 = 0.5*(dis[1]-dis[0]), 0.5*(dis[-1]-dis[-2])
-        self.If = np.array([dis[0]-d1] + list(If) + [dis[-1]+d2])
+        d1, d2 = 0.5*(self.dis[1]-self.dis[0]), 0.5*(self.dis[-1]-self.dis[-2])
+        self.If = np.array([self.dis[0]-d1] + list(If) + [self.dis[-1]+d2])
         self.Ip = np.zeros(len(self.If), dtype=int)
         for i in range(1, len(self.Ip)-1):
             self.Ip[i] = np.where(self.dis > self.If[i])[0][0]
@@ -59,6 +59,6 @@ class DiffSystem(object):
             X, DC = np.array(X), np.array(DC)
             fD = [0]*self.Np
             for i in range(self.Np):
-                pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+                pid = np.where((X >= self.Xr[i, 0]) & (X <= self.Xr[i, 1]))[0]
                 fD[i] = splrep(X[pid], np.log(DC[pid]))
             self.Dfunc = fD

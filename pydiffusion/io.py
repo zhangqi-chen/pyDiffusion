@@ -22,7 +22,7 @@ def save_csv(name, profile=None, diffsys=None):
         data = pd.DataFrame({'dis': profile.dis, 'X': profile.X})
         data.to_csv(name, index=False)
     else:
-        dis, X, Xr = profile.dis, profile.X, diffsys.Xr
+        dis, X, Xr, fD = profile.dis, profile.X, diffsys.Xr, diffsys.Dfunc
         DC = np.zeros(len(dis))
         for i in range(diffsys.Np):
             pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]

@@ -10,8 +10,8 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     Parameters
     ----------
     profile : pydiffusion.diffusion.DiffProfile
-        The profile meshing is based on. It should be similar to final simulated profile.
-        e.g. Smoothed experimental profile.
+        The profile meshing is based on. It should be similar to final
+        simulated profile. e.g. Smoothed experimental profile.
     diffsys : pydiffusion.diffusion.DiffSystem
         The diffusion coefficients for simulation.
     n : list
@@ -165,7 +165,7 @@ def SF(profile, time, Xlim=[]):
     return DC
 
 
-def matanocalc(profile, Xlim=[]):
+def matanocalc(profile, Xlim=None):
     """
     Matano Plane calculation.
 
@@ -182,14 +182,20 @@ def matanocalc(profile, Xlim=[]):
         Matano Plane location.
     """
     dis, X = profile.dis, profile.X
-    XL, XR = X[0], X[-1] if Xlim == [] else Xlim
+    if Xlim is None:
+        XL, XR = X[0], X[-1]
+    elif isinstance(Xlim, list) and len(Xlim) == 2:
+        XL, XR = Xlim
+    else:
+        raise ValueError('Xlim is a list with length = 2')
     return (np.trapz(X, dis)-dis[-1]*XR+dis[0]*XL)/(XL-XR)
 
 
 def error_profile(profilesim, profileexp):
     """
-    Calculate the difference (in mole fraction) between experimental profile and simulated profile.
-    This function take profilesim as reference, i.e. compare profileexp against profilesim.
+    Calculate the difference (in mole fraction) between experimental profile
+    and simulated profile. This function take profilesim as reference, i.e. 
+    compare profileexp against profilesim.
 
     Parameters
     ----------
@@ -258,7 +264,7 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=efunc):
     for i in range(Np):
         if X >= Xr[i, 0] and X <= Xr[i, 1]:
             Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-            Df = np.exp(splev(Xf, fD))
+            Df = np.exp(splev(Xf, fD[i]))
             eid = np.where((Xf >= X-r) & (Xf <= X+r))[0]
             for j in eid:
                 Df[j] *= 10**(deltaD * efunc(X, Xf[j], r))

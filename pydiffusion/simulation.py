@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.interpolate import splev, splrep
 from pydiffusion import DiffProfile
+from pydiffusion.utils import error_profile, DCbias
 
 
-def sphSim(profile, diffsys, time):
+def sphSim(profile, diffsys, time, output=True):
     """
     Single-Phase Diffusion Simulation
 
@@ -15,6 +16,8 @@ def sphSim(profile, diffsys, time):
         Diffusion coefficients.
     time : float
         time in seconds.
+    output : boolean, optional
+        Print simulation progress, default = True.
 
     Returns
     -------
@@ -37,13 +40,14 @@ def sphSim(profile, diffsys, time):
         Xs[1:-1] = Xs[1:-1]-dt*(Jf[1:]-Jf[:-1])/dj
         Xs[0] -= Jf[0]/d[0]*dt*2
         Xs[-1] += Jf[-1]/d[-1]*dt*2
-        if np.mod(m, 3e4) == 0:
+        if output and np.mod(m, 3e4) == 0:
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
-    print('Simulation Complete')
+    if output:
+        print('Simulation Complete')
     return DiffProfile(dis*1e6, Xs)
 
 
-def mphSim(profile, diffsys, time):
+def mphSim(profile, diffsys, time, output=True):
     """
     Multiple-Phase Diffusion Simulation.
 
@@ -55,6 +59,8 @@ def mphSim(profile, diffsys, time):
         Diffusion coefficients.
     time : float
         time in seconds.
+    output : boolean, optional
+        Print simulation progress, default = True.
 
     Returns
     -------
@@ -167,9 +173,10 @@ def mphSim(profile, diffsys, time):
                                                [Xs[Ip[i]-2], Xr[i-1, 1]], k=1)
                                         )
 
-        if np.mod(m, 3e4) == 0:
+        if output and np.mod(m, 3e4) == 0:
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
-    print('Simulation Complete')
+    if output:
+        print('Simulation Complete')
 
     # Insert interface informations
     for i in list(range(Np-1, 0, -1)):
@@ -177,3 +184,101 @@ def mphSim(profile, diffsys, time):
         Xs = np.insert(Xs, Ip[i], [Xr[i-1, 1], Xr[i, 0]])
 
     return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6)
+
+
+def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-3):
+    """
+    Error analysis of diffusion coefficients through comparison with experimental
+    data.
+
+    Parameters
+    ----------
+    profile_exp : pydiffusion.diffusion.DiffProfile
+        Experiment measured diffusion profile, which is used to compared against
+        each simulation result.
+    profile_init : pydiffusion.diffusion.DiffProfile
+        The initial profile for diffusion simulation, usually a step profile.
+    diffsys : pydiffusion.diffusion.DiffSystem
+        Reference diffusion coefficients. Simulation based on this datasets will
+        be the reference for the error analysis.
+        Bias will then be applied to this diffusivity datasets before each
+        simulation.
+    time : float
+        Diffusion time in seconds.
+    loc : list or int, optional
+        loc indicates the locations to perform error analysis. If loc is an
+        integer, loc points are selected inside each phase. Each point has
+        both positive and negative error to be calculated.
+    accuracy : float, optional
+        Stop criterion of each simulation: within error_cap * (1+-accuracy)
+
+    Returns
+    -------
+    loc : numpy.array
+        Locations performed error analysis
+    error : numpy.array with shape (n,2)
+        Error calculated for each point
+    profiles : list
+        Output all simulation result with cap error.
+    """
+    profile_ref = mphSim(profile_init, diffsys, time)
+    error_ref = error_profile(profile_ref, profile_exp)
+    ipt = input('Reference error= % .6f. Input cap error: [% .6f]' % (error_ref, error_ref*1.01))
+    error_cap = error_ref*1.01 if ipt == '' else float(ipt)
+    print('Cap error = % .6f' % error_cap)
+
+    if isinstance(loc, int):
+        n = loc
+        loc = np.array([])
+        for i in range(diffsys.Np):
+            loc = np.append(loc, np.linspace(diffsys.Xr[i, 0], diffsys.Xr[i, 1], n))
+
+    profiles = []
+    error = np.zeros((len(loc), 2))
+    deltaD = -0.5
+    for i in range(len(loc)):
+        X = loc[i]
+        profile_at_X = []
+        for p in range(2):
+            n_sim = 0
+            deltaD = -deltaD
+            De, Xe = [0], [error_ref]
+            while True:
+                n_sim += 1
+                diffsys_error = DCbias(diffsys, X, deltaD)
+                profile_error = mphSim(profile_init, diffsys_error, time, False)
+                error_sim = error_profile(profile_error, profile_exp)
+                print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)' % (X, n_sim, deltaD, error_sim, error_cap))
+
+                if abs(error_sim-error_cap) < error_cap*accuracy:
+                    profile_at_X += [profile_error]
+                    error[i, p] = deltaD
+                    break
+
+                if len(De) == 1:
+                    if error_sim > error_cap:
+                        De += [deltaD]
+                        Xe += [error_sim]
+                        fe = splrep(Xe, De, k=1)
+                        deltaD = float(splev(error_cap, fe))
+                    else:
+                        De, Xe = [deltaD], [error_sim]
+                        deltaD *= 2
+                else:
+                    j = 1 if error_sim > error_cap else 0
+                    De[j], Xe[j] = deltaD, error_sim
+
+                    if (Xe[1]-Xe[0])/abs(De[1]-De[0]) > 100:
+                        deltaD = De[0]
+                        print('Jump between %f and %f' % (De[0], De[1]))
+                        break
+                    elif (Xe[1]-Xe[0]) > abs(De[1]-De[0]) and n_sim > 4:
+                        deltaD = np.mean(De)
+                    else:
+                        fe = splrep(Xe, De, k=1)
+                        deltaD = float(splev(error_cap, fe))
+            profile_at_X += [profile_error]
+            error[i, p] = deltaD
+        profiles += [profile_at_X]
+
+    return loc, error, profiles
