@@ -3,35 +3,70 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import splev
 
 
-def profileplot(diffprofile, compare=None, data=None):
-    "Plot diffusion profile"
-    dis, X = diffprofile.dis, diffprofile.X
-    plt.figure('Diffusion Profile')
-    if data is not None:
-        plt.plot(data.dis, data.X, 'go', fillstyle='none')
-    plt.plot(dis, X, 'b-', lw=2)
-    if compare is not None:
-        plt.plot(compare.dis, compare.X, 'r-', lw=2)
-    plt.xlabel('Distance (micron)')
-    plt.ylabel('Mole fraction')
-    plt.show()
+def profileplot(profile, ax=None, **kwargs):
+    """
+    Plot diffusion profiles
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Diffusion profile object
+    ax : matplotlib.Axes
+        Default axes used if not specified
+    kwargs : kwargs
+        Passed to 'matplotlib.pyplot.plot'
+    """
+    dis, X = profile.dis, profile.X
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    ax.plot(dis, X, **kwargs)
+    ax.set_xlabel('Distance (micron)', fontsize=15)
+    ax.set_ylabel('Mole fraction', fontsize=15)
+    ax.tick_params(labelsize=12)
 
 
-def DCplot(diffsys, loc=None, error=None):
-    "Plot diffusion coefficients"
-    plt.figure('Diffusion Coefficients')
-    for i in range(diffsys.Np):
-        Xf = np.linspace(diffsys.Xr[i, 0], diffsys.Xr[i, 1], 100)
-        Df = np.exp(splev(Xf, diffsys.Dfunc[i]))
-        plt.semilogy(Xf, Df, 'b-', lw=2)
-    if loc is not None and error is not None:
-        assert error.shape == (len(loc), 2), 'Wrong error data'
-        for i in range(diffsys.Np):
-            pid = np.where((loc >= diffsys.Xr[i, 0]) & (loc <= diffsys.Xr[i, 1]))[0]
-            Xf = loc[pid]
-            Dfp = np.exp(splev(Xf, diffsys.Dfunc[i])) * 10**error[pid, 0]
-            Dfn = np.exp(splev(Xf, diffsys.Dfunc[i])) * 10**error[pid, 1]
-            plt.semilogy(Xf, Dfp, 'r-', Xf, Dfn, 'r-', lw=2)
-    plt.xlabel('Mole fraction')
-    plt.ylabel('Diffusion Coefficients (m2/s)')
-    plt.show()
+def DCplot(diffsys, ax=None, err=None, **kwargs):
+    """
+    Plot diffusion coefficients
+
+    Parameters
+    ----------
+    diffsys : DiffProfile
+        Diffusion system object
+    ax : matplotlib.Axes
+        Default axes used if not specified
+    err : DiffError
+        Error analysis result
+    kwargs : kwargs
+        Passed to 'matplotlib.pyplot.semilogy'
+    """
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
+
+    # Diffusion Coefficients plot
+    for i in range(Np):
+        Xp = np.linspace(Xr[i, 0], Xr[i, 1], 100)
+        Dp = np.exp(splev(Xp, fD[i]))
+        if 'c' in kwargs or 'color' in kwargs:
+            ax.semilogy(Xp, Dp, **kwargs)
+        else:
+            if i == 0:
+                p = ax.semilogy(Xp, Dp, **kwargs)
+            else:
+                ax.semilogy(Xp, Dp, c=p[0].get_color(), **kwargs)
+
+    # Error analysis result plot
+    if err is not None:
+        loc, errors = err.loc, err.errors
+        for i in range(Np):
+            pid = np.where((loc >= Xr[i, 0]) & (loc <= Xr[i, 1]))[0]
+            Dloc = np.exp(splev(loc[pid], fD[i]))
+            ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2)
+            ax.semilogy(loc[pid], Dloc * 10**errors[pid, 1], 'r--', lw=2)
+
+    ax.set_xlabel('Mole fraction', fontsize=15)
+    ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
+    ax.tick_params(labelsize=12)

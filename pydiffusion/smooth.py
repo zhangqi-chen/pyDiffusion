@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
-from pydiffusion import DiffProfile
+from pydiffusion.core import DiffProfile
 
 
 def movingradius(dis, X, r):

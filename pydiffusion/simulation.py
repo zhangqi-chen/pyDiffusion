@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import splev, splrep
-from pydiffusion import DiffProfile
+from pydiffusion.core import DiffProfile, DiffError
 from pydiffusion.utils import error_profile, DCbias
 
 
@@ -10,9 +10,9 @@ def sphSim(profile, diffsys, time, output=True):
 
     Parameters
     ----------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Initial diffusion profile before simulation.
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         Diffusion coefficients.
     time : float
         time in seconds.
@@ -21,7 +21,7 @@ def sphSim(profile, diffsys, time, output=True):
 
     Returns
     -------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Simulated diffusion profile
     """
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
@@ -55,9 +55,9 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
 
     Parameters
     ----------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Initial profile before simulation.
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         Diffusion coefficients.
     time : float
         time in seconds.
@@ -72,7 +72,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
 
     Returns
     -------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Simulated diffusion profile
     """
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
@@ -80,10 +80,14 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
     Np, Xr = diffsys.Np, diffsys.Xr.copy()
     fD = [f for f in diffsys.Dfunc]
 
-    if len(Ip) != Np+1:
-        raise ValueError('Number of interfaces mismatches between profile and diffusion system')
+    if len(If) != Np+1:
+        raise ValueError('Number of phases mismatches between profile and diffusion system')
     if liquid not in [-1, 0, 1]:
         raise ValueError('liquid can only be 0 1 or -1')
+    try:
+        time = float(time)
+    except TypeError:
+        print('Wrong type for time variable')
 
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
@@ -231,41 +235,48 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
     return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6)
 
 
-def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-3):
+def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
+                  accuracy=1e-3, output=True):
     """
     Error analysis of diffusion coefficients through comparison with experimental
     data.
 
     Parameters
     ----------
-    profile_exp : pydiffusion.diffusion.DiffProfile
+    profile_exp : DiffProfile
         Experiment measured diffusion profile, which is used to compared against
         each simulation result.
-    profile_init : pydiffusion.diffusion.DiffProfile
+    profile_init : DiffProfile
         The initial profile for diffusion simulation, usually a step profile.
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         Reference diffusion coefficients. Simulation based on this datasets will
         be the reference for the error analysis.
         Bias will then be applied to this diffusivity datasets before each
         simulation.
     time : float
         Diffusion time in seconds.
-    loc : list or int, optional
+    loc : list or int
         loc indicates the locations to perform error analysis. If loc is an
         integer, loc points are selected inside each phase. Each point has
         both positive and negative error to be calculated.
-    accuracy : float, optional
-        Stop criterion of each simulation: within error_cap * (1+-accuracy)
+    accuracy : float
+        Stop criterion of each simulation: within error_cap * (1+-accuracy).
+        Low accuracy value may increase simulation times for each point.
+    output : boolean, optional
+        Print analysis progress, default = True.
 
     Returns
     -------
-    loc : numpy.array
-        Locations performed error analysis
-    error : numpy.array with shape (n,2)
-        Error calculated for each point
-    profiles : list
-        Output all simulation result with cap error.
+    differror : DiffError
+        Diffusion error object
     """
+    if len(profile_init.If) != diffsys.Np+1:
+        raise ValueError('Number of phases mismatches between profile and diffusion system')
+    try:
+        time = float(time)
+    except TypeError:
+        print('Wrong type for time variable')
+
     profile_ref = mphSim(profile_init, diffsys, time)
     error_ref = error_profile(profile_ref, profile_exp)
     ipt = input('Reference error= % .6f. Input cap error: [% .6f]' % (error_ref, error_ref*1.01))
@@ -279,7 +290,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-
             loc = np.append(loc, np.linspace(diffsys.Xr[i, 0], diffsys.Xr[i, 1], n))
 
     profiles = []
-    error = np.zeros((len(loc), 2))
+    errors = np.zeros((len(loc), 2))
     deltaD = -0.5
     for i in range(len(loc)):
         X = loc[i]
@@ -291,14 +302,13 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-
             while True:
                 n_sim += 1
                 diffsys_error = DCbias(diffsys, X, deltaD)
-                profile_error = mphSim(profile_init, diffsys_error, time, False)
+                profile_error = mphSim(profile_init, diffsys_error, time, output=False)
                 error_sim = error_profile(profile_error, profile_exp)
-                print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'
-                      % (X, n_sim, deltaD, error_sim, error_cap))
+                if output:
+                    print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'
+                          % (X, n_sim, deltaD, error_sim, error_cap))
 
                 if abs(error_sim-error_cap) < error_cap*accuracy:
-                    profile_at_X += [profile_error]
-                    error[i, p] = deltaD
                     break
 
                 if len(De) == 1:
@@ -316,7 +326,8 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-
 
                     if (Xe[1]-Xe[0])/abs(De[1]-De[0]) > 100:
                         deltaD = De[0]
-                        print('Jump between %f and %f' % (De[0], De[1]))
+                        if output:
+                            print('Jump between %f and %f' % (De[0], De[1]))
                         break
                     elif (Xe[1]-Xe[0]) > abs(De[1]-De[0]) and n_sim > 4:
                         deltaD = np.mean(De)
@@ -324,7 +335,13 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, accuracy=1e-
                         fe = splrep(Xe, De, k=1)
                         deltaD = float(splev(error_cap, fe))
             profile_at_X += [profile_error]
-            error[i, p] = deltaD
+            errors[i, p] = deltaD
         profiles += [profile_at_X]
+        data = {}
+        data['exp'] = profile_exp
+        data['ref'] = profile_ref
+        data['error'] = profiles
 
-    return loc, error, profiles
+    differror = DiffError(diffsys, loc, errors, data)
+
+    return differror

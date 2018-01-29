@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.interpolate import splev
-from pydiffusion import DiffProfile, DiffSystem
+from pydiffusion.core import DiffProfile, DiffSystem
 
 
 def save_csv(name, profile=None, diffsys=None):
@@ -46,7 +46,10 @@ def read_csv(name, Xr=None):
                 If += [dis[i]]
                 XIf += [X[i], X[i+1]]
         profile = DiffProfile(dis, X, If)
-        XIf = np.array([X[0]] + XIf + [X[-1]])
+        if Xr is None:
+            XIf = np.array([X[0]] + XIf + [X[-1]])
+        else:
+            XIf = np.array([Xr[0]] + XIf + [Xr[-1]])
         Xr = XIf.reshape((len(XIf)//2, 2))
     if 'DC' in data.columns:
         DC = np.array(data['DC'])

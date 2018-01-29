@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import splev, splrep, UnivariateSpline
-from pydiffusion import DiffProfile, DiffSystem
+from pydiffusion.core import DiffProfile, DiffSystem
 
 
 def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
@@ -9,10 +9,10 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
 
     Parameters
     ----------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         The profile meshing is based on. It should be similar to final
         simulated profile. e.g. Smoothed experimental profile.
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         The diffusion coefficients for simulation.
     n : list
         meshing number range, default = [400, 500]
@@ -82,7 +82,7 @@ def step(dis, matano, diffsys):
 
     Returns
     -------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Step profile can be used for input of pydiffusion.simulation.mphSim
     """
     Np = diffsys.Np
@@ -141,7 +141,7 @@ def SF(profile, time, Xlim=[]):
 
     Parameters
     ----------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Diffusion profile
     time : float
         Diffusion time in seconds
@@ -171,7 +171,7 @@ def matanocalc(profile, Xlim=None):
 
     Parameters
     ----------
-    profile : pydiffusion.diffusion.DiffProfile
+    profile : DiffProfile
         Diffusion Profile.
     Xlim : list
         The left and right end concentration of the profile.
@@ -194,14 +194,14 @@ def matanocalc(profile, Xlim=None):
 def error_profile(profilesim, profileexp):
     """
     Calculate the difference (in mole fraction) between experimental profile
-    and simulated profile. This function take profilesim as reference, i.e. 
+    and simulated profile. This function take profilesim as reference, i.e.
     compare profileexp against profilesim.
 
     Parameters
     ----------
-    profilesim : pydiffusion.diffusion.DiffProfile
+    profilesim : DiffProfile
         Simulated diffusion profile.
-    profileexp : pydiffusion.diffusion.DiffProfile
+    profileexp : DiffProfile
         Experiemntal measured profile.
 
     Returns
@@ -240,7 +240,7 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=efunc):
 
     Parameters
     ----------
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         Original diffusion coefficients.
     X : float
         Concentration location which has largest bias.
@@ -255,7 +255,7 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=efunc):
 
     Returns
     -------
-    fDbias : pydiffusion.diffusion.DiffSystem
+    fDbias : DiffSystem
         Diffusion coefficients with bias.
 
     """
