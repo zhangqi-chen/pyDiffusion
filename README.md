@@ -1,3 +1,11 @@
-# pyDiffusion is a tool for diffusion data analysis
+# **pyDiffusion**
 
-pyDiffusion combines tools like diffusion simulation, diffusion data smooth, forward simulation analysis, etc. to help people analyze diffusion data efficiently.
+**pyDiffusion** combines tools like **diffusion simulation**, **diffusion data smooth**, **forward simulation analysis (FSA)**, etc. to help people analyze diffusion data efficiently.
+
+## Diffusion Simulation
+
+![NiMo](docs/NiMo.png)
+
+## Error Analysis
+
+![TiZr Error Analysis](docs/TiZr_error.png)
