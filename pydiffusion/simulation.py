@@ -1,3 +1,8 @@
+"""
+The simulation module contains diffusion simulation function and
+simulation-based error analysis tools.
+"""
+
 import numpy as np
 from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile, DiffError

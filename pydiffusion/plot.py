@@ -1,3 +1,8 @@
+"""
+The plot module provides support for virtualization of diffusion profile data
+and diffusion coefficients data using matplotlib.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev

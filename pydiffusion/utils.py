@@ -1,5 +1,9 @@
+"""
+The util module provide tools for diffusion data processing and analysis.
+"""
+
 import numpy as np
-from scipy.interpolate import splev, splrep, UnivariateSpline
+from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile, DiffSystem
 
 
@@ -100,31 +104,6 @@ def step(dis, matano, diffsys):
         return DiffProfile(dis, X, If)
 
 
-def Dmodel(profile, time, Xlim=[]):
-    dis, X = profile.dis, profile.X
-    DC = SF(profile, time, Xlim)
-    Xlim = [X[0], X[-1]] if Xlim == [] else Xlim
-    Xr = np.array(Xlim)
-    for i in range(len(dis)-1):
-        if dis[i] == dis[i+1]:
-            Xr = np.insert(Xr, -1, [X[i], X[i+1]])
-    Np = len(Xr)//2
-    Xr = Xr.reshape(Np, 2)
-    fD = [0]*Np
-    for i in range(Np):
-        msg = 'Enter the UnivariateSpline factor p [0.9] for phase %i' % (i+1)
-        msg += ' (p=0.9 means UnivariateSpline only fit 5-95% of data):\n'
-        ipt = input(msg)
-        p = float(ipt) if ipt != '' else 0.9
-        Xdiff = Xr[i, 1]-Xr[i, 0]
-        start, end = Xr[i, 0]+Xdiff*(1-p)/2, Xr[i, 1]-Xdiff*(1-p)/2
-        pid = np.where((X >= start) & (X <= end))[0]
-        fDC = UnivariateSpline(X[pid], np.log(DC[pid]), bbox=[Xr[i, 0], Xr[i, 1]], k=2)
-        Xf = np.linspace(Xr[i, 0], Xr[i, 1], 20)
-        fD[i] = splrep(Xf, fDC(Xf), k=2)
-    return DiffSystem(Xr, Dfunc=fD)
-
-
 def profilefunc(profile):
     "Create a tck interpolation (k=1) of the diffusion profile"
     disn, Xn = profile.dis.copy(), profile.X.copy()
@@ -135,34 +114,17 @@ def profilefunc(profile):
     return splrep(disn, Xn, k=1)
 
 
-def SF(profile, time, Xlim=[]):
-    """
-    Use Sauer-Fraise method to calculate diffusion coefficients from profile
-
-    Parameters
-    ----------
-    profile : DiffProfile
-        Diffusion profile
-    time : float
-        Diffusion time in seconds
-    Xlim : list (float), optional
-        Indicates the left and right concentration limits for calculation.
-        Default value = [profile.X[0], profile.X[-1]]
-
-    Returns
-    -------
-    DC : numpy.array
-        Diffusion coefficients
-    """
-    dis, X = profile.dis, profile.X
-    XL, XR = X[0], X[-1] if Xlim == [] else Xlim
-    Y1 = (X-XL)/(XR-XL)
-    Y2 = 1-Y1
-    dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
-    intvalue = np.array([Y2[i]*np.trapz(Y1[:i], dis[:i])+Y1[i]*(np.trapz(Y2[i:], dis[i:])) for i in range(1, len(dis)-1)])
-    DC = intvalue/dYds/2/time*1e-12
-    DC = np.append(DC[0], np.append(DC, DC[-1]))
-    return DC
+def disfunc(dis, X):
+    "Create a interpolation (k=1) of the dis vs. X profile"
+    if list(X).count(X[0]) > 1 and list(X).count(X[-1]) > 1:
+        pid = np.where((X > X[0]) & (X < X[-1]))[0]
+    elif list(X).count(X[0]) > 1:
+        pid = np.where((X > X[0]))[0]
+    elif list(X).count(X[-1]) > 1:
+        pid = np.where((X < X[-1]))[0]
+    else:
+        pid = np.arange(len(X))
+    return splrep(X[pid], dis[pid], k=1)
 
 
 def matanocalc(profile, Xlim=None):

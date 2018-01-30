@@ -1,3 +1,8 @@
+"""
+The smooth module provides tools for data smoothing of original diffusion
+profile data.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
@@ -97,9 +102,16 @@ def datasmooth(dis, X, interface=[], n=2000):
     profile : pydiffusion.diffusion.DiffProfile
     """
     dis, X = np.array(dis), np.array(X)
-    assert len(dis) == len(X), 'Nonequal length of distance and composition data'
-    Np = len(interface)+1
-    If = [dis[0]-0.5] + interface + [dis[-1]+0.5]
+    if len(dis) != len(X):
+        raise ValueError('Nonequal length of distance and composition data')
+    try:
+        If = np.array(interface)
+    except TypeError:
+        print('interface must be array_like')
+    if If.ndim != 1:
+        raise ValueError('interface must be 1d-array')
+    If = [dis[0]-0.5] + list(If) + [dis[-1]+0.5]
+    Np = len(If)-1
     Ip = [0]*(Np+1)
     disn, Xn = dis.copy(), X.copy()
 

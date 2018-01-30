@@ -1,3 +1,7 @@
+"""
+The core module gives definition of main classes in pyDiffusion.
+"""
+
 import numpy as np
 from scipy.interpolate import splrep
 

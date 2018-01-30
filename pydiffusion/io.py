@@ -1,3 +1,8 @@
+"""
+The io module provides support for reading and writing diffusion profile data
+and diffusion coefficients data to csv files.
+"""
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import splev
