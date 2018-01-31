@@ -58,9 +58,12 @@ class DiffSystem(object):
         Np of tck tuple discribe the diffusion coefficient function for each phase.
     X, DC : array-like, optional
         Use exsiting data to model Dfunc.
+    Xspl : list of array, optional
+        Xspl is the reference locations to create Dfunc, useful for forward
+        simulation analysis.
     """
 
-    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None):
+    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None):
         if isinstance(Xr, list):
             if len(Xr) != 2:
                 raise ValueError('If Xr is a list, it must has length of 2')
@@ -96,6 +99,10 @@ class DiffSystem(object):
                 pid = np.where((X >= self.Xr[i, 0]) & (X <= self.Xr[i, 1]))[0]
                 fD[i] = splrep(X[pid], np.log(DC[pid]))
             self.Dfunc = fD
+        if Xspl is not None:
+            if len(Xspl) != self.Np:
+                raise ValueError('Length of Xspl must be equal to phase number Np')
+        self.Xspl = Xspl
 
 
 class DiffError(object):

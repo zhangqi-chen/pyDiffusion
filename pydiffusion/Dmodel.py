@@ -124,7 +124,7 @@ def Dfunc_uspl(X, DC, Xp, Xr):
     return splrep(Xf, fDC(Xf), k=2)
 
 
-def Dadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=None, r=0.02):
+def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02):
     """
     Adjust diffusion coefficient fitting function by comparing simulated
     profile against reference profile. The purpose is to let simulated
@@ -162,8 +162,8 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=None
 
     if ph >= diffsys.Np:
         raise ValueError('Incorrect phase #, 0 <= ph <= %i' % diffsys.Np-1)
-    if pp and Xp is None:
-        raise ValueError('Xp must be provided in per-point mode')
+    if pp and 'Xspl' not in dir(diffsys):
+        raise ValueError('diffsys must have Xspl properties in per-point mode')
 
     Dfunc, Xr, Np = diffsys.Dfunc[ph], diffsys.Xr[ph], diffsys.Np
     rate = 1
@@ -176,7 +176,9 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=None
     idref = np.where((Xref >= Xr[0]) & (Xref <= Xr[1]))[0]
     idsim = np.where((Xsim >= Xr[0]) & (Xsim <= Xr[1]))[0]
 
-    if Xp is None:
+    if 'Xspl' in dir(diffsys):
+        Xp = diffsys.Xspl[ph]
+    else:
         Xp = np.linspace(Xr[0], Xr[1], 30)
     Dp = np.exp(splev(Xp, Dfunc))
 
@@ -269,6 +271,7 @@ def Dmodel(profile, time, Xlim=[]):
     plt.pause(1)
     ipt = input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]')
     choice = False if 'N' in ipt or 'n' in ipt else True
+    Xspl = [0] * Np if choice else None
 
     for i in range(Np):
         pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
@@ -290,6 +293,7 @@ def Dmodel(profile, time, Xlim=[]):
                 Xp = Xget[:, 0]
                 Dp = Dpcalc(X, DC, Xp)
                 fD[i] = Dfunc_spl(Xp, Dp)
+                Xspl[i] = Xp
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
                 plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
@@ -321,4 +325,4 @@ def Dmodel(profile, time, Xlim=[]):
                 if redo:
                     break
 
-    return DiffSystem(Xr, Dfunc=fD)
+    return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl)

@@ -6,6 +6,7 @@ and diffusion coefficients data using matplotlib.
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev
+from pydiffusion.Dmodel import SF
 
 
 def profileplot(profile, ax=None, **kwargs):
@@ -28,6 +29,21 @@ def profileplot(profile, ax=None, **kwargs):
     ax.plot(dis, X, **kwargs)
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)
+    ax.tick_params(labelsize=12)
+
+
+def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
+    """
+    Plot Sauer-Fraise calculated diffusion coefficients
+    """
+    X = profile.X
+    sf = SF(profile, time, Xlim)
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    ax.semilogy(X, sf, **kwargs)
+    ax.set_xlabel('Mole fraction', fontsize=15)
+    ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
     ax.tick_params(labelsize=12)
 
 

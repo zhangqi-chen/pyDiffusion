@@ -71,7 +71,7 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     return np.array(dism)
 
 
-def step(dis, matano, diffsys):
+def step(dis, matano, diffsys, Xlim=[]):
     """
     Create a step profile at the matano plane.
 
@@ -83,6 +83,9 @@ def step(dis, matano, diffsys):
         Matano plane location (micron).
     diffsys : pydiffusion.diffusion.DiffSystem
         The diffusion system information for initial setups before simulation.
+    Xlim : list (float), optional
+        Indicates the left and right concentration limits for step profile.
+        Default value = [diffsys.Xr[0][0], diffsys.Xr[-1][1]].
 
     Returns
     -------
@@ -90,7 +93,10 @@ def step(dis, matano, diffsys):
         Step profile can be used for input of pydiffusion.simulation.mphSim
     """
     Np = diffsys.Np
-    XL, XR = diffsys.Xr[0][0], diffsys.Xr[-1][1]
+    if Xlim == []:
+        XL, XR = diffsys.Xr[0][0], diffsys.Xr[-1][1]
+    else:
+        [XL, XR] = Xlim
     X = np.ones(len(dis))*XL
     X[dis > matano] = XR
     if Np == 1:
@@ -196,7 +202,7 @@ def efunc(X, Xf, r):
     return deltae
 
 
-def DCbias(diffsys, X, deltaD, r=0.3, efunc=efunc):
+def DCbias(diffsys, X, deltaD, r=0.3, efunc=None):
     """
     This function creates bias for a diffusion coefficients profile
 
@@ -210,7 +216,9 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=efunc):
         Scale of the bias. D *= 10**deltaD is the maximum of bias.
     r : float, optional
         Bias at X will create smaller bias in range of (X-r, X+r)
-    efunc : function
+    efunc : function, optional
+        Function to create bias on diffusion coefficients.
+        Default = pydiffusion.utils.efunc
         efunc(X, Xf, r)
         efunc should return 1 as the maximum when X == Xf,
         and return 0 when abs(X-Xf) == r.
