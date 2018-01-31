@@ -34,7 +34,7 @@ def phasesmooth(dis, X):
     Xsm = X.copy()
     smoo = True
     while smoo:
-        plt.figure('Phase Smooth')
+        plt.figure()
         plt.cla()
         plt.plot(dis, Xsm, 'bo')
         plt.draw()

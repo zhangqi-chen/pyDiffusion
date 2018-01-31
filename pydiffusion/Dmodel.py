@@ -1,9 +1,10 @@
 """
-The Dmodel module provide tools to fit a smooth diffusion coefficient curve
+The Dmodel module provides tools to fit a smooth diffusion coefficient curve
 based on Sauer-Fraise calculation results and the tools to adjust it.
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev, UnivariateSpline
 from pydiffusion.core import DiffSystem
 from pydiffusion.utils import disfunc
@@ -28,8 +29,13 @@ def SF(profile, time, Xlim=[]):
     DC : numpy.array
         Diffusion coefficients.
     """
+    try:
+        time = float(time)
+    except TypeError:
+        print('Cannot convert time to float')
+
     dis, X = profile.dis, profile.X
-    XL, XR = X[0], X[-1] if Xlim == [] else Xlim
+    [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
     Y1 = (X-XL)/(XR-XL)
     Y2 = 1-Y1
     dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
@@ -77,7 +83,7 @@ def Dpcalc(X, DC, Xp):
     return Dp
 
 
-def fDC_spl(Xp, Dp):
+def Dfunc_spl(Xp, Dp):
     """
     Return a spline function to model diffusion coefficients.
     The function can be constant(1), linear(2) or quadratic(>2) depending on
@@ -99,7 +105,7 @@ def fDC_spl(Xp, Dp):
     return fDC
 
 
-def fDC_uspl(X, DC, Xp, Xr):
+def Dfunc_uspl(X, DC, Xp, Xr):
     """
     Use UnivariateSpline to model diffusion coefficients.
 
@@ -118,7 +124,7 @@ def fDC_uspl(X, DC, Xp, Xr):
     return splrep(Xf, fDC(Xf), k=2)
 
 
-def DCadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=None, r=0.02):
+def Dadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=None, r=0.02):
     """
     Adjust diffusion coefficient fitting function by comparing simulated
     profile against reference profile. The purpose is to let simulated
@@ -224,25 +230,95 @@ def DCadjust(profile_ref, profile_sim, diffsys, ph, Xp=None, pp=True, deltaD=Non
 
 
 def Dmodel(profile, time, Xlim=[]):
+    """
+    Given the diffusion profile and diffusion time, modeling the diffusion
+    coefficients for each phase.
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Diffusion profile. Multiple phase profile must be after datasmooth to
+        identify phase boundaries.
+    time : float
+        Diffusion time
+    Xlim : list, optional
+        Left and Right limit of diffusion coefficients. Xlim is also passed to
+        SF function to calculate diffusion coefficients initially.
+    """
+    if not isinstance(Xlim, list):
+        raise TypeError('Xlim must be a list')
+    if len(Xlim) != 2 and Xlim != []:
+        raise ValueError('Xlim must be an empty list or a list with length = 2')
+
+    # Initial set-up of Xr (phase boundaries)
     dis, X = profile.dis, profile.X
-    DC = SF(profile, time, Xlim)
     Xlim = [X[0], X[-1]] if Xlim == [] else Xlim
-    Xr = np.array(Xlim)
+    DC = SF(profile, time, Xlim)
+    Xr = np.array(Xlim, dtype=float)
     for i in range(len(dis)-1):
         if dis[i] == dis[i+1]:
             Xr = np.insert(Xr, -1, [X[i], X[i+1]])
     Np = len(Xr)//2
     Xr = Xr.reshape(Np, 2)
     fD = [0]*Np
+
+    # Choose Spline or UnivariateSpline
+    plt.figure()
+    plt.semilogy(X, DC, 'b.')
+    plt.draw()
+    plt.pause(1)
+    ipt = input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]')
+    choice = False if 'N' in ipt or 'n' in ipt else True
+
     for i in range(Np):
-        msg = 'Enter the UnivariateSpline factor p [0.9] for phase %i' % (i+1)
-        msg += ' (p=0.9 means UnivariateSpline only fit 5-95% of data):\n'
-        ipt = input(msg)
-        p = float(ipt) if ipt != '' else 0.9
-        Xdiff = Xr[i, 1]-Xr[i, 0]
-        start, end = Xr[i, 0]+Xdiff*(1-p)/2, Xr[i, 1]-Xdiff*(1-p)/2
-        pid = np.where((X >= start) & (X <= end))[0]
-        fDC = UnivariateSpline(X[pid], np.log(DC[pid]), bbox=[Xr[i, 0], Xr[i, 1]], k=2)
-        Xf = np.linspace(Xr[i, 0], Xr[i, 1], 20)
-        fD[i] = splrep(Xf, fDC(Xf), k=2)
+        pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+
+        # Spline
+        if choice:
+            while True:
+                plt.cla()
+                plt.semilogy(X[pid], DC[pid], 'b.')
+                plt.draw()
+                plt.pause(.1)
+                msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
+                ipt = input(msg+'How many points for spline function of this phase? [4]')
+                n = int(ipt) if ipt != '' else 4
+                plt.title('Select %i points in this phase' % n)
+                plt.draw()
+                plt.pause(.1)
+                Xget = np.array(plt.ginput(n))
+                Xp = Xget[:, 0]
+                Dp = Dpcalc(X, DC, Xp)
+                fD[i] = Dfunc_spl(Xp, Dp)
+                Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
+                plt.draw()
+                plt.pause(.1)
+                ipt = input('Continue to next phase? [y]')
+                redo = False if 'N' in ipt or 'n' in ipt else True
+                if redo:
+                    break
+
+        # UnivariateSpline
+        else:
+            while True:
+                plt.cla()
+                plt.semilogy(X[pid], DC[pid], 'b.')
+                plt.draw()
+                plt.pause(.1)
+                plt.title('Select 2 boundaries for UnivariateSpline')
+                plt.draw()
+                plt.pause(.1)
+                Xget = np.array(plt.ginput(2))
+                Xp = Xget[:, 0]
+                fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
+                Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
+                plt.draw()
+                plt.pause(.1)
+                ipt = input('Continue to next phase? [y]')
+                redo = False if 'N' in ipt or 'n' in ipt else True
+                if redo:
+                    break
+
     return DiffSystem(Xr, Dfunc=fD)

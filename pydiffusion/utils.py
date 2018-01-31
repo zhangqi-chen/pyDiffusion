@@ -1,5 +1,5 @@
 """
-The util module provide tools for diffusion data processing and analysis.
+The util module provides tools for diffusion data processing and analysis.
 """
 
 import numpy as np
