@@ -97,7 +97,10 @@ class DiffSystem(object):
             fD = [0]*self.Np
             for i in range(self.Np):
                 pid = np.where((X >= self.Xr[i, 0]) & (X <= self.Xr[i, 1]))[0]
-                fD[i] = splrep(X[pid], np.log(DC[pid]))
+                if len(pid) > 2:
+                    fD[i] = splrep(X[pid], np.log(DC[pid]), k=2)
+                else:
+                    fD[i] = splrep(X[pid], np.log(DC[pid]), k=1)
             self.Dfunc = fD
         if Xspl is not None:
             if len(Xspl) != self.Np:

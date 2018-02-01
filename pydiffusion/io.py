@@ -36,7 +36,7 @@ def save_csv(name, profile=None, diffsys=None):
         data.to_csv(name, index=False)
 
 
-def read_csv(name, Xr=None):
+def read_csv(name, Xlim=None):
     "read profile and DC data from csv"
     data = pd.read_csv(name)
     if 'X' not in data.columns:
@@ -51,10 +51,10 @@ def read_csv(name, Xr=None):
                 If += [dis[i]]
                 XIf += [X[i], X[i+1]]
         profile = DiffProfile(dis, X, If)
-        if Xr is None:
+        if Xlim is None:
             XIf = np.array([X[0]] + XIf + [X[-1]])
         else:
-            XIf = np.array([Xr[0]] + XIf + [Xr[-1]])
+            XIf = np.array([Xlim[0]] + XIf + [Xlim[-1]])
         Xr = XIf.reshape((len(XIf)//2, 2))
     if 'DC' in data.columns:
         DC = np.array(data['DC'])

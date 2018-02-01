@@ -23,10 +23,12 @@ def profileplot(profile, ax=None, **kwargs):
         Passed to 'matplotlib.pyplot.plot'
     """
     dis, X = profile.dis, profile.X
+    clw = {'c': 'b', 'lw': 2}
+    args = {**clw, **kwargs}
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-    ax.plot(dis, X, **kwargs)
+    ax.plot(dis, X, **args)
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)
     ax.tick_params(labelsize=12)
@@ -51,10 +53,12 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     """
     X = profile.X
     sf = SF(profile, time, Xlim)
+    clw = {'c': 'b', 'marker': '.', 'ls': 'none'}
+    args = {**clw, **kwargs}
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-    ax.semilogy(X, sf, **kwargs)
+    ax.semilogy(X, sf, **args)
     ax.set_xlabel('Mole fraction', fontsize=15)
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
     ax.tick_params(labelsize=12)
@@ -79,18 +83,17 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
         fig = plt.figure()
         ax = fig.add_subplot(111)
     Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
-
+    clw = {'c': 'b', 'lw': 2}
+    args = {**clw, **kwargs}
     # Diffusion Coefficients plot
     for i in range(Np):
-        Xp = np.linspace(Xr[i, 0], Xr[i, 1], 100)
+        Xp = np.linspace(Xr[i, 0], Xr[i, 1], 51)
         Dp = np.exp(splev(Xp, fD[i]))
-        if 'c' in kwargs or 'color' in kwargs:
-            ax.semilogy(Xp, Dp, **kwargs)
+        if i == 0:
+            Dmin, Dmax = min(Dp), max(Dp)
         else:
-            if i == 0:
-                p = ax.semilogy(Xp, Dp, **kwargs)
-            else:
-                ax.semilogy(Xp, Dp, c=p[0].get_color(), **kwargs)
+            Dmin, Dmax = min(Dmin, min(Dp)), max(Dmax, max(Dp))
+        ax.semilogy(Xp, Dp, **args)
 
     # Error analysis result plot
     if err is not None:
@@ -101,6 +104,7 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2)
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 1], 'r--', lw=2)
 
+    ax.set_ylim(Dmin/10, Dmax*10)
     ax.set_xlabel('Mole fraction', fontsize=15)
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
     ax.tick_params(labelsize=12)
