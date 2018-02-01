@@ -7,4 +7,5 @@ from pydiffusion.core import DiffProfile, DiffSystem
 from pydiffusion.simulation import mphSim, ErrorAnalysis
 from pydiffusion.fsa import FSA
 from pydiffusion.plot import profileplot, DCplot
-from pydiffusion.utils import SF, matanocalc
+from pydiffusion.utils import matanocalc
+from pydiffusion.Dmodel import SF, Dmodel

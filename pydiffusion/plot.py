@@ -35,6 +35,19 @@ def profileplot(profile, ax=None, **kwargs):
 def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     """
     Plot Sauer-Fraise calculated diffusion coefficients
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Diffusion profile object, passed to 'pydiffusion.Dmodel.SF'
+    time : float
+        Passed to 'pydiffusion.Dmodel.SF'
+    Xlim : list
+        Passed to 'pydiffusion.Dmodel.SF'
+    ax : matplotlib.Axes
+        Default axes used if not specified
+    kwargs : kwargs
+        Passed to 'matplotlib.pyplot.semilogy'
     """
     X = profile.X
     sf = SF(profile, time, Xlim)

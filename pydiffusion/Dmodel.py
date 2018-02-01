@@ -214,7 +214,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
         return splrep(Xp, np.log(Dp), k=2)
 
     # Per point adjustment
-    for i in len(Xp):
+    for i in range(len(Xp)):
         # X1, X2 is the lower, upper bound to collect profile data
         # X1, X2 cannot exceed phase bound Xr
         X1, X2 = max(Xp[i]-r, Xr[0]), min(Xp[i]+r, Xr[1])

@@ -1,7 +1,7 @@
 """
 The fsa module provides tools to perform Forward Simulation Analysis (FSA).
 """
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from pydiffusion.core import DiffSystem
 from pydiffusion.utils import error_profile, step, matanocalc, mesh
 from pydiffusion.Dmodel import Dadjust
@@ -12,6 +12,7 @@ from pydiffusion.simulation import mphSim
 def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
     """
     Forward Simulation Analysis
+    Extract diffusion coefficients based on a diffusion profile.
 
     Parameters
     ----------
@@ -25,11 +26,11 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
     time : float
         Diffusion time in seconds
     Xlim : list (float), optional
-        Passed to pydiffusion.Dmodel.SF, pydiffusion.utils.step.
+        Passed to 'pydiffusion.Dmodel.SF', 'pydiffusion.utils.step'.
         Indicates the left and right concentration limits for calculation.
         Default value = [profile.X[0], profile.X[-1]].
     n : list
-        Passed to pydiffusion.utils.mesh.
+        Passed to 'pydiffusion.utils.mesh'.
         Meshing number range, default = [400, 500].
 
     Returns
@@ -62,12 +63,13 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
     diffsys_sim = DiffSystem(diffsys.Xr, diffsys.Dfunc, Xspl=diffsys.Xspl)
 
     # Plot FSA status
-    fig = plt.figure(figsize=(16, 6))
+    fig = plt.figure('FSA', figsize=(16, 6))
     ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
     profileplot(profile_exp, ax1, ls='none', marker='o', c='b', fillstyle='none')
     profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
     SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
     DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
+    plt.tight_layout()
     plt.draw()
     plt.pause(1.0)
 
@@ -78,7 +80,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
         n_sim += 1
         profile_sim = mphSim(profile_init, diffsys_sim, time)
         error_sim = error_profile(profile_sim, profile_exp)
-        print('Simulation %i, error = %f(%f)' % (error_sim, error_stop))
+        print('Simulation %i, error = %f(%f)' % (n_sim, error_sim, error_stop))
 
         # Plot simulation results
         ax1.cla()
@@ -104,8 +106,8 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
         if error_sim <= error_stop or n_sim > 9:
 
             # Ask if exit
-            ipt = 'Satisfied with FSA? [n]'
-            if 'y' or 'Y' in ipt:
+            ipt = input('Satisfied with FSA? [n]')
+            if 'y' in ipt or 'Y' in ipt:
                 break
 
             # If use per-point mode
@@ -124,8 +126,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
             manual = True if 'y' in ipt or 'Y' in ipt else False
             for ph in range(diffsys_sim.Np):
                 if manual:
-                    ipt = input('Input deltaD for phase # %i:\n \
-                                 DC = DC * 10^deltaD, default deltaD = auto' % ph+1)
+                    ipt = input('Input deltaD for phase # %i:\nDC = DC * 10^deltaD, default deltaD = auto' % (ph+1))
                     deltaD = float(ipt) if ipt != '' else None
                 else:
                     deltaD = None

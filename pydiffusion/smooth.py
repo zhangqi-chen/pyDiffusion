@@ -15,6 +15,12 @@ def movingradius(dis, X, r):
     The first and last data point is unchanged, data at d is averaged by data
     in the range of (d-r, d+r)
 
+    Parameters
+    ----------
+    dis, X : numpy.array
+        Diffusion profile required to be smoothed
+    r : float
+        Radius (micron) of moving average
     """
     dmin, dmax = dis[0], dis[-1]
     n = np.size(dis)
@@ -30,6 +36,10 @@ def phasesmooth(dis, X):
     """
     Data smooth of a single phase, Using movingradius method.
 
+    Parameters
+    ----------
+    dis, X : numpy.array
+        Diffusion profile within a single phase
     """
     Xsm = X.copy()
     smoo = True
@@ -83,15 +93,15 @@ def phasesmooth(dis, X):
     return Xsm
 
 
-def datasmooth(dis, X, interface=[], n=2000):
+def datasmooth(profile, interface=[], n=2000):
     """
     Data smooth of diffusion profile. The functions use moving radius method
     on each phase.
 
     Parameters
     ----------
-    dis, X : array-like
-        Diffusion profile data
+    profile: DiffProfile
+        Diffusion profile data.
     interface : list of float
         Np-1 locations of interfaces for a Np-phase system
     n : int
@@ -101,7 +111,7 @@ def datasmooth(dis, X, interface=[], n=2000):
     -------
     profile : pydiffusion.diffusion.DiffProfile
     """
-    dis, X = np.array(dis), np.array(X)
+    dis, X = profile.dis, profile.X
     if len(dis) != len(X):
         raise ValueError('Nonequal length of distance and composition data')
     try:
