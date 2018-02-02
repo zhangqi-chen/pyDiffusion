@@ -10,7 +10,9 @@ from pydiffusion.core import DiffProfile, DiffSystem
 
 
 def save_csv(name, profile=None, diffsys=None):
-    "save data as csv"
+    """
+    Save diffusion data as csv.
+    """
     if profile is None and diffsys is None:
         raise ValueError('No data entered')
     elif profile is None:
@@ -37,7 +39,9 @@ def save_csv(name, profile=None, diffsys=None):
 
 
 def read_csv(name, Xlim=None):
-    "read profile and DC data from csv"
+    """
+    Read diffusion data from csv.
+    """
     data = pd.read_csv(name)
     if 'X' not in data.columns:
         raise ValueError('No column X in csv file')

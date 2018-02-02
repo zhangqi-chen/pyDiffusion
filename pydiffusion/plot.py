@@ -31,6 +31,8 @@ def profileplot(profile, ax=None, **kwargs):
     ax.plot(dis, X, **args)
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)
+    ax.set_xlim(dis.min(), dis.max())
+    ax.set_ylim(X.min(), X.max())
     ax.tick_params(labelsize=12)
 
 
@@ -61,6 +63,7 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     ax.semilogy(X, sf, **args)
     ax.set_xlabel('Mole fraction', fontsize=15)
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
+    ax.set_xlim(X.min(), X.max())
     ax.tick_params(labelsize=12)
 
 
@@ -104,6 +107,7 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2)
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 1], 'r--', lw=2)
 
+    ax.set_xlim(Xr[0, 0], Xr[-1, 1])
     ax.set_ylim(Dmin/10, Dmax*10)
     ax.set_xlabel('Mole fraction', fontsize=15)
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
