@@ -339,6 +339,9 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
                     else:
                         fe = splrep(Xe, De, k=1)
                         deltaD = float(splev(error_cap, fe))
+            direction = 'positive' if p == 0 else 'negative'
+            print('Error (%s) at %.3f = %f, %i simulations performed, profile difference = %f'
+                  % (direction, X, deltaD, n_sim, error_sim))
             profile_at_X += [profile_error]
             errors[i, p] = deltaD
         profiles += [profile_at_X]
@@ -347,6 +350,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
         data['ref'] = profile_ref
         data['error'] = profiles
 
+    print('Error analysis complete')
     differror = DiffError(diffsys, loc, errors, data)
 
     return differror

@@ -191,7 +191,7 @@ def error_profile(profilesim, profileexp):
     return error / len(disexp)
 
 
-def efunc(X, Xf, r):
+def efunc_default(X, Xf, r):
     "Default efunc to create bias for diffusion coefficients"
     if abs(Xf-X) <= r/2:
         deltae = 1-2*(X-Xf)**2/r**2
@@ -230,6 +230,7 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=None):
 
     """
     Xr, Np, fD = diffsys.Xr, diffsys.Np, diffsys.Dfunc
+    efunc = efunc_default if efunc == None else efunc
     fDbias = []
     for i in range(Np):
         if X >= Xr[i, 0] and X <= Xr[i, 1]:
