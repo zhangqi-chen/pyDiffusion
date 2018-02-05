@@ -18,7 +18,7 @@ def save_csv(name, profile=None, diffsys=None):
     elif profile is None:
         Xr, fD = diffsys.Xr, diffsys.Dfunc
         X, DC = np.array([]), np.array([])
-        for i in diffsys.Np:
+        for i in range(diffsys.Np):
             Xnew = np.linspace(Xr[i, 0], Xr[i, 1], 30)
             Dnew = np.exp(splev(Xnew, fD[i]))
             X = np.append(X, Xnew)
@@ -38,7 +38,7 @@ def save_csv(name, profile=None, diffsys=None):
         data.to_csv(name, index=False)
 
 
-def read_csv(name, Xlim=None):
+def read_csv(name, Xr=None, Xlim=None):
     """
     Read diffusion data from csv.
     """
@@ -64,5 +64,6 @@ def read_csv(name, Xlim=None):
         DC = np.array(data['DC'])
     else:
         X = DC = None
-    diffsys = DiffSystem(Xr, X=X, DC=DC)
+    if Xr is not None:
+        diffsys = DiffSystem(Xr, X=X, DC=DC)
     return profile, diffsys

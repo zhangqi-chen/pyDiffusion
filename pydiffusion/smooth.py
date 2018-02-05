@@ -62,8 +62,8 @@ def phasesmooth(dis, X):
             plt.draw()
             plt.pause(.1)
             Xsmn = np.copy(Xsm[zmid])
-            msg = 'Enter Start and End Composition for this region: '
-            msg += str(Xsmn[0])+' '+str(Xsmn[-1])+'\n'
+            msg = 'Enter Start and End Composition for this region: ['
+            msg += str(Xsmn[0])+' '+str(Xsmn[-1])+']\n'
             ipt = input(msg)
             if ipt != '':
                 Xsmn[0], Xsmn[-1] = [float(i) for i in ipt.split(' ')]
@@ -152,11 +152,12 @@ def datasmooth(profile, interface=[], n=2000):
             fX = splrep(disn[Ip[i]:Ip[i+1]], Xn[Ip[i]:Ip[i+1]], k=1)
             disni[ni[i]:ni[i+1]] = np.linspace(disn[Ip[i]], disn[Ip[i+1]-1], ni[i+1]-ni[i])
             Xni[ni[i]:ni[i+1]] = splev(disni[ni[i]:ni[i+1]], fX)
-    plt.figure('Smooth Result')
+    plt.figure()
     plt.cla()
+    plt.title('Smoothed Result')
     plt.plot(dis, X, 'bo', fillstyle='none')
     plt.plot(disni, Xni, 'r-', lw=2)
     plt.draw()
-    plt.pause(5)
+    plt.pause(1.0)
 
     return DiffProfile(disni, Xni, If[1:-1])

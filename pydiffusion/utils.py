@@ -230,7 +230,7 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=None):
 
     """
     Xr, Np, fD = diffsys.Xr, diffsys.Np, diffsys.Dfunc
-    efunc = efunc_default if efunc == None else efunc
+    efunc = efunc_default if efunc is None else efunc
     fDbias = []
     for i in range(Np):
         if X >= Xr[i, 0] and X <= Xr[i, 1]:

@@ -9,7 +9,7 @@ from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.simulation import mphSim
 
 
-def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
+def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True):
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
@@ -47,14 +47,14 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
 
     # Determine the stop criteria of forward simulations
     error_sm = error_profile(profile_sm, profile_exp)
-    ipt = input('Default error = %.6f\nInput the stop criteria of error: [%.6f]'
+    ipt = input('Default error = %.6f\nInput the stop criteria of error: [%.6f]\n'
                 % (error_sm, error_sm*2))
     error_stop = error_sm*2 if ipt == '' else float(ipt)
 
     # If there is no Xspl info in diffsys, use whole-phase mode
     # else: ask if use whole-phase or per-point mode
     if diffsys.Xspl is not None:
-        ipt = input('Use whole-phase mode? [n]\n(The shape of diffusivity curve does not change')
+        ipt = input('Use whole-phase mode? [n]\n(The shape of diffusivity curve does not change)\n')
         pp = False if 'y' in ipt or 'Y' in ipt else True
     else:
         pp = False
@@ -83,8 +83,12 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
         print('Simulation %i, error = %f(%f)' % (n_sim, error_sim, error_stop))
 
         # Plot simulation results
-        ax1.cla()
-        ax2.cla()
+        if not gui:
+            fig = plt.figure(figsize=(16, 6))
+            ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
+        else:
+            ax1.cla()
+            ax2.cla()
         profileplot(profile_exp, ax1, ls='none', marker='o', c='b', fillstyle='none')
         profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
         profileplot(profile_sim, ax1, ls='-', c='r', lw=2)
@@ -134,6 +138,14 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
 
             # Apply the adjustment to diffsys_sim
             diffsys_sim.Dfunc = Dfunc_adjust
+
+            if not gui:
+                fig = plt.figure(figsize=(16, 6))
+                ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
+                profileplot(profile_exp, ax1, ls='none', marker='o', c='b', fillstyle='none')
+                profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
+                profileplot(profile_sim, ax1, ls='-', c='r', lw=2)
+                SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
 
             DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
             plt.draw()
