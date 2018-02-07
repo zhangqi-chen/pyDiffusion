@@ -9,7 +9,7 @@ from scipy.interpolate import splev
 from pydiffusion.Dmodel import SF
 
 
-def profileplot(profile, ax=None, **kwargs):
+def profileplot(profile, ax=None, err=None, **kwargs):
     """
     Plot diffusion profiles
 
@@ -29,6 +29,15 @@ def profileplot(profile, ax=None, **kwargs):
         fig = plt.figure()
         ax = fig.add_subplot(111)
     ax.plot(dis, X, **args)
+
+    # Error analysis result plot
+    if err is not None:
+        profiles = err.profiles['error']
+        for i in range(len(profiles)):
+            p = profiles[i]
+            ax.plot(p[0].dis, p[0].X, 'r--', lw=1)
+            ax.plot(p[1].dis, p[1].X, 'r--', lw=1)
+
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)
     ax.set_xlim(dis.min(), dis.max())

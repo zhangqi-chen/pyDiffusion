@@ -133,7 +133,7 @@ def disfunc(dis, X):
     return splrep(X[pid], dis[pid], k=1)
 
 
-def matanocalc(profile, Xlim=None):
+def matanocalc(profile, Xlim=[]):
     """
     Matano Plane calculation.
 
@@ -150,7 +150,7 @@ def matanocalc(profile, Xlim=None):
         Matano Plane location.
     """
     dis, X = profile.dis, profile.X
-    if Xlim is None:
+    if Xlim == []:
         XL, XR = X[0], X[-1]
     elif isinstance(Xlim, list) and len(Xlim) == 2:
         XL, XR = Xlim

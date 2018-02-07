@@ -96,7 +96,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
 
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
-    Jf, DCs = np.zeros(len(dis)), np.zeros(len(dis))
+    Jf, DCs = np.zeros(len(dis)-1), np.zeros(len(dis)-1)
     JIf = np.zeros([Np+1, 2])
     vIf = np.zeros(Np+1)
     t, m = 0.0, 0
@@ -179,9 +179,9 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
         # Composition changes at first & last grid
         # If there is liquid phase attached, composition unchanged.
         if liquid != -1:
-            Xs[0] -= Jf[0]/d[0]*dt*2
+            Xs[0] -= Jf[0]/d[0]*dt
         if liquid != 1:
-            Xs[-1] += Jf[-1]/d[-1]*dt*2
+            Xs[-1] += Jf[-1]/d[-1]*dt
 
         # If one phase comsumed, delete this phase
         if If[1]+vIf[1]*dt <= dis[0]:
@@ -282,7 +282,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
     except TypeError:
         print('Wrong type for time variable')
 
-    profile_ref = mphSim(profile_init, diffsys, time)
+    profile_ref = mphSim(profile_init, diffsys, time, output=output)
     error_ref = error_profile(profile_ref, profile_exp)
     ipt = input('Reference error= % .6f. Input cap error: [% .6f]' % (error_ref, error_ref*1.01))
     error_cap = error_ref*1.01 if ipt == '' else float(ipt)
@@ -307,7 +307,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
             while True:
                 n_sim += 1
                 diffsys_error = DCbias(diffsys, X, deltaD)
-                profile_error = mphSim(profile_init, diffsys_error, time, output=False)
+                profile_error = mphSim(profile_init, diffsys_error, time, output=output)
                 error_sim = error_profile(profile_error, profile_exp)
                 if output:
                     print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'

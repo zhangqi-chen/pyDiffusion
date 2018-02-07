@@ -7,6 +7,56 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import splev
 from pydiffusion.core import DiffProfile, DiffSystem
+import matplotlib.pyplot as plt
+import threading
+
+# To solve the problem when matplotlib figure freezes when input used
+# https://stackoverflow.com/questions/34938593/matplotlib-freezes-when-input-used-in-spyder
+prompt = False
+promptText = ""
+done = False
+waiting = False
+response = ""
+
+regular_input = input
+
+
+def threadfunc():
+    global prompt
+    global done
+    global waiting
+    global response
+
+    while not done:
+        if prompt:
+            prompt = False
+            response = regular_input(promptText)
+            waiting = True
+
+
+def ask_input(text):
+    global waiting
+    global prompt
+    global promptText
+
+    promptText = text
+    prompt = True
+
+    while not waiting:
+        plt.pause(1)
+    waiting = False
+
+    return response
+
+
+def ita_start():
+    thread = threading.Thread(target=threadfunc)
+    thread.start()
+
+
+def ita_finish():
+    global done
+    done = True
 
 
 def save_csv(name, profile=None, diffsys=None):
@@ -38,7 +88,7 @@ def save_csv(name, profile=None, diffsys=None):
         data.to_csv(name, index=False)
 
 
-def read_csv(name, Xr=None, Xlim=None):
+def read_csv(name, Xlim=None):
     """
     Read diffusion data from csv.
     """

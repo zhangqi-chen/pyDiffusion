@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev, UnivariateSpline
 from pydiffusion.core import DiffSystem
 from pydiffusion.utils import disfunc
+from pydiffusion.io import ita_start, ita_finish, ask_input
 
 
 def SF(profile, time, Xlim=[]):
@@ -207,10 +208,10 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
             X1 = Xr[0]*0.9 + Xr[1]*0.1
         if ph == Np-1:
             X2 = Xr[0]*0.1 + Xr[1]*0.9
-        dref = splev([X1, X2], fdis_ref)
-        dsim = splev([X1, X2], fdis_sim)
-        wref = dref[1]-dref[0]
-        wsim = dsim[1]-dsim[0]
+        ref = splev([X1, X2], fdis_ref)
+        sim = splev([X1, X2], fdis_sim)
+        wref = ref[1]-ref[0]
+        wsim = sim[1]-sim[0]
         Dp *= np.sqrt(wref/wsim)
         return Dfunc_spl(Xp, Dp)
 
@@ -232,7 +233,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
     return Dfunc_spl(Xp, Dp)
 
 
-def Dmodel(profile, time, Xlim=[], gui=True):
+def Dmodel(profile, time, Xlim=[]):
     """
     Given the diffusion profile and diffusion time, modeling the diffusion
     coefficients for each phase.
@@ -265,12 +266,12 @@ def Dmodel(profile, time, Xlim=[], gui=True):
     Xr = Xr.reshape(Np, 2)
     fD = [0]*Np
 
+    ita_start()
+
     # Choose Spline or UnivariateSpline
     plt.figure()
     plt.semilogy(X, DC, 'b.')
-    plt.show()
-    plt.pause(1)
-    ipt = input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
+    ipt = ask_input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
     choice = False if 'N' in ipt or 'n' in ipt else True
     Xspl = [0] * Np if choice else None
 
@@ -283,37 +284,18 @@ def Dmodel(profile, time, Xlim=[], gui=True):
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
                 plt.draw()
-                plt.pause(.1)
-                if gui:
-                    msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
-                    ipt = input(msg+'How many points for spline function of this phase? [4]\n')
-                    n = int(ipt) if ipt != '' else 4
-                    plt.title('Select %i points in this phase' % n)
-                    plt.draw()
-                    plt.pause(.1)
-                    Xget = np.array(plt.ginput(n))
-                    Xp = Xget[:, 0]
-                    Dp = Dpcalc(X, DC, Xp)
-                    fD[i] = Dfunc_spl(Xp, Dp)
-                    Xspl[i] = Xp
-                    Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                    plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
-                    plt.draw()
-                    plt.pause(.1)
-                else:
-                    msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
-                    ipt = input(msg+'Input reference locations for spline function\n')
-                    Xp = np.array([float(x) for x in ipt.split(' ')])
-                    Dp = Dpcalc(X, DC, Xp)
-                    fD[i] = Dfunc_spl(Xp, Dp)
-                    Xspl[i] = Xp
-                    Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                    plt.cla()
-                    plt.semilogy(X[pid], DC[pid], 'b.')
-                    plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
-                    plt.draw()
-                    plt.pause(.1)
-                ipt = input('Continue to next phase? [y]')
+                msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
+                ipt = ask_input(msg+'input reference locations for spline function\n')
+                Xp = np.array([float(x) for x in ipt.split(' ')])
+                Dp = Dpcalc(X, DC, Xp)
+                fD[i] = Dfunc_spl(Xp, Dp)
+                Xspl[i] = Xp
+                Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+                plt.cla()
+                plt.semilogy(X[pid], DC[pid], 'b.')
+                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
+                plt.draw()
+                ipt = ask_input('Continue to next phase? [y]')
                 redo = False if 'N' in ipt or 'n' in ipt else True
                 if redo:
                     break
@@ -324,35 +306,24 @@ def Dmodel(profile, time, Xlim=[], gui=True):
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
                 plt.draw()
-                plt.pause(.1)
-                if gui:
-                    plt.title('Select 2 boundaries for UnivariateSpline')
-                    plt.draw()
-                    plt.pause(.1)
-                    Xget = np.array(plt.ginput(2))
-                    Xp = Xget[:, 0]
-                    fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
-                else:
-                    ipt = input('Input 2 boundaries for UnivariateSpline\n')
-                    Xp = np.array([float(x) for x in ipt.split(' ')])
-                    fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
+                ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
+                Xp = np.array([float(x) for x in ipt.split(' ')])
+                fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
                 plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
-                plt.pause(.1)
-                ipt = input('Continue to next phase? [y]')
+                ipt = ask_input('Continue to next phase? [y]')
                 redo = False if 'N' in ipt or 'n' in ipt else True
                 if redo:
                     break
 
-    plt.figure()
     plt.cla()
     plt.title('DC Modeling Result')
     plt.semilogy(X, DC, 'b.')
     for i in range(Np):
         Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
         plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
-    plt.show()
-    plt.pause(1.0)
+
+    ita_finish()
 
     return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl)
