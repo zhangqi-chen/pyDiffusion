@@ -7,9 +7,10 @@ from pydiffusion.utils import error_profile, step, matanocalc, mesh
 from pydiffusion.Dmodel import Dadjust
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.simulation import mphSim
+from pydiffusion.io import ita_start, ita_finish, ask_input
 
 
-def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True):
+def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
@@ -69,7 +70,6 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True)
     profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
     SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
     DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
-    plt.tight_layout()
     plt.draw()
     plt.pause(1.0)
 
@@ -83,19 +83,14 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True)
         print('Simulation %i, error = %f(%f)' % (n_sim, error_sim, error_stop))
 
         # Plot simulation results
-        if not gui:
-            fig = plt.figure(figsize=(16, 6))
-            ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
-        else:
-            ax1.cla()
-            ax2.cla()
+        ax1.cla()
+        ax2.cla()
         profileplot(profile_exp, ax1, ls='none', marker='o', c='b', fillstyle='none')
         profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
         profileplot(profile_sim, ax1, ls='-', c='r', lw=2)
         SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
         DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
         plt.draw()
-        plt.pause(.1)
 
         # DC adjust
         Dfunc_adjust = [0] * diffsys_sim.Np
@@ -109,19 +104,27 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True)
         # If error < stop criteria or simulate too many times
         if error_sim <= error_stop or n_sim > 9:
 
+            ita_start()
+
             # Ask if exit
-            ipt = input('Satisfied with FSA? [n]')
+            ipt = ask_input('Satisfied with FSA? [n]')
             if 'y' in ipt or 'Y' in ipt:
+                ita_finish()
                 break
 
             # If use per-point mode
             if diffsys_sim.Xspl is not None:
-                ipt = input('Use per-point mode? [y]')
+                ipt = ask_input('Use per-point mode? [y]')
                 pp = False if 'n' in ipt or 'N' in ipt else True
                 if pp:
                     for ph in range(diffsys_sim.Np):
                         Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp)
                     diffsys_sim.Dfunc = Dfunc_adjust
+
+                    DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
+                    plt.draw()
+                    plt.pause(1.0)
+                    ita_finish()
                     continue
 
             # Whole-phase mode, ask if use manual input for
@@ -139,16 +142,9 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], gui=True)
             # Apply the adjustment to diffsys_sim
             diffsys_sim.Dfunc = Dfunc_adjust
 
-            if not gui:
-                fig = plt.figure(figsize=(16, 6))
-                ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
-                profileplot(profile_exp, ax1, ls='none', marker='o', c='b', fillstyle='none')
-                profileplot(profile_sm, ax1, ls='-', c='g', lw=1)
-                profileplot(profile_sim, ax1, ls='-', c='r', lw=2)
-                SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
-
             DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
             plt.draw()
-            plt.pause(.1)
+            plt.pause(1.0)
+            ita_finish()
 
     return profile_sim, diffsys_sim

@@ -98,7 +98,7 @@ def Dfunc_spl(Xp, Dp):
         Corresponding diffusion coefficients at Xp.
     """
     if len(Xp) == 1:
-        fDC = splrep([Xp, Xp*1.01], [np.log(Dp), np.log(Dp)], k=1)
+        fDC = splrep([Xp[0], Xp[0]*1.01], [np.log(Dp[0]), np.log(Dp[0])], k=1)
     elif len(Xp) == 2:
         fDC = splrep(Xp, np.log(Dp), k=1)
     else:
@@ -119,7 +119,7 @@ def Dfunc_uspl(X, DC, Xp, Xr):
     Xr : 1d-array with shape (1, 2)
         Expanded range of UnivariateSpline, usually is the phase range.
     """
-    pid = np.where((X >= Xp[0]) & (X <= Xp[1]))[0]
+    pid = np.where((X >= Xp[0]) & (X <= Xp[-1]))[0]
     fDC = UnivariateSpline(X[pid], np.log(DC[pid]), bbox=[Xr[0], Xr[1]], k=2)
     Xf = np.linspace(Xr[0], Xr[1], 30)
     return splrep(Xf, fDC(Xf), k=2)
@@ -233,7 +233,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
     return Dfunc_spl(Xp, Dp)
 
 
-def Dmodel(profile, time, Xlim=[]):
+def Dmodel(profile, time, Xspl=None, Xlim=[]):
     """
     Given the diffusion profile and diffusion time, modeling the diffusion
     coefficients for each phase.
@@ -273,6 +273,40 @@ def Dmodel(profile, time, Xlim=[]):
     plt.semilogy(X, DC, 'b.')
     ipt = ask_input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
     choice = False if 'N' in ipt or 'n' in ipt else True
+
+    # Xspl provided, no need for manually picking Xspl
+    if Xspl is not None:
+        if len(Xspl) != Np:
+            raise ValueError('Xspl must has a length of phase number')
+
+        for i in range(Np):
+            pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+
+            # Spline
+            if choice:
+                Dp = Dpcalc(X, DC, Xspl[i])
+                fD[i] = Dfunc_spl(Xspl[i], Dp)
+
+            # UnivariateSpline
+            else:
+                fD[i] = Dfunc_uspl(X, DC, Xspl[i], Xr[i])
+
+        print('DC modeling finished, Xspl info:')
+        print(Xspl)
+
+        plt.cla()
+        plt.title('DC Modeling Result')
+        plt.semilogy(X, DC, 'b.')
+        for i in range(Np):
+            Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+            plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+        plt.pause(1.0)
+        plt.show()
+
+        ita_finish()
+
+        return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl)
+
     Xspl = [0] * Np if choice else None
 
     for i in range(Np):
@@ -285,11 +319,13 @@ def Dmodel(profile, time, Xlim=[]):
                 plt.semilogy(X[pid], DC[pid], 'b.')
                 plt.draw()
                 msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
-                ipt = ask_input(msg+'input reference locations for spline function\n')
-                Xp = np.array([float(x) for x in ipt.split(' ')])
+                ipt = ask_input(msg+'input # of spline points\n')
+                plt.title('Select %i points of Spline' % int(ipt))
+                plt.pause(1.0)
+                Xp = np.array(plt.ginput(int(ipt)))[:, 0]
                 Dp = Dpcalc(X, DC, Xp)
                 fD[i] = Dfunc_spl(Xp, Dp)
-                Xspl[i] = Xp
+                Xspl[i] = list(Xp)
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
@@ -317,12 +353,17 @@ def Dmodel(profile, time, Xlim=[]):
                 if redo:
                     break
 
+    print('DC modeling finished, Xspl info:')
+    print(Xspl)
+
     plt.cla()
     plt.title('DC Modeling Result')
     plt.semilogy(X, DC, 'b.')
     for i in range(Np):
         Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
         plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+    plt.pause(1.0)
+    plt.show()
 
     ita_finish()
 

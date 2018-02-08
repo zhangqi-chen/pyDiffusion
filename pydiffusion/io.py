@@ -43,13 +43,15 @@ def ask_input(text):
     prompt = True
 
     while not waiting:
-        plt.pause(1)
+        plt.pause(1.0)
     waiting = False
 
     return response
 
 
 def ita_start():
+    global done
+    done = False
     thread = threading.Thread(target=threadfunc)
     thread.start()
 
