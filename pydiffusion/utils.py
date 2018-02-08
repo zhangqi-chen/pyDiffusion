@@ -144,8 +144,8 @@ def matanocalc(profile, Xlim=[]):
     Xlim : list
         The left and right end concentration of the profile.
 
-    Returns:
-    --------
+    Returns
+    -------
     matano : float
         Matano Plane location.
     """

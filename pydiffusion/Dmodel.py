@@ -146,15 +146,15 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
         If provided, spline function Dfunc must be determined by [Xp, Dp]
         alone, where Dp = exp(Dfunc(Xp)).
     pp : bool, optional
-        Per-point mode (True) or whole-phase mode (False). Per-point mode
-        adjusts each Dp at Xp by itself. In whole-phase mode, all Dp are
+        Point Mode (True) or Phase Mode (False). Point Mode
+        adjusts each Dp at Xp by itself. In Phase Mode, all Dp are
         adjusted by the same rate, i.e. the diffusivity curve shape won't
         change.
     deltaD: float, optional
-        Only useful at whole-phase mode. deltaD gives the rate to change
+        Only useful at Phase Mode. deltaD gives the rate to change
         diffusion coefficients DC. DC = DC * 10^deltaD
     r : float, optional
-        Only useful at per-phase mode, default = 0.02, 0 < r < 1. r gives the
+        Only useful at Phase Mode, default = 0.02, 0 < r < 1. r gives the
         range to calculate the concentration gradient around X, [X-r, X+r].
 
     """
@@ -215,7 +215,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
         Dp *= np.sqrt(wref/wsim)
         return Dfunc_spl(Xp, Dp)
 
-    # Per point adjustment
+    # Point Mode adjustment
     for i in range(len(Xp)):
         # X1, X2 is the lower, upper bound to collect profile data
         # X1, X2 cannot exceed phase bound Xr
@@ -271,6 +271,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
     # Choose Spline or UnivariateSpline
     plt.figure()
     plt.semilogy(X, DC, 'b.')
+    plt.xlabel('Mole fraction')
+    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
     ipt = ask_input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
     choice = False if 'N' in ipt or 'n' in ipt else True
 
@@ -300,6 +302,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
         for i in range(Np):
             Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
             plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+        plt.xlabel('Mole fraction')
+        plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
         plt.pause(1.0)
         plt.show()
 
@@ -317,6 +321,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
             while True:
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
+                plt.xlabel('Mole fraction')
+                plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
                 plt.draw()
                 msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
                 ipt = ask_input(msg+'input # of spline points\n')
@@ -327,8 +333,6 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
                 fD[i] = Dfunc_spl(Xp, Dp)
                 Xspl[i] = list(Xp)
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                plt.cla()
-                plt.semilogy(X[pid], DC[pid], 'b.')
                 plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
                 ipt = ask_input('Continue to next phase? [y]')
@@ -341,6 +345,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
             while True:
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
+                plt.xlabel('Mole fraction')
+                plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
                 plt.draw()
                 ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
                 Xp = np.array([float(x) for x in ipt.split(' ')])
@@ -362,6 +368,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
     for i in range(Np):
         Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
         plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+    plt.xlabel('Mole fraction')
+    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
     plt.pause(1.0)
     plt.show()
 

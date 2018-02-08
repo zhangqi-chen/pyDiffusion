@@ -52,10 +52,10 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
                 % (error_sm, error_sm*2))
     error_stop = error_sm*2 if ipt == '' else float(ipt)
 
-    # If there is no Xspl info in diffsys, use whole-phase mode
-    # else: ask if use whole-phase or per-point mode
+    # If there is no Xspl info in diffsys, use Phase Mode
+    # else: ask if use Phase or Point Mode
     if diffsys.Xspl is not None:
-        ipt = input('Use whole-phase mode? [n]\n(The shape of diffusivity curve does not change)\n')
+        ipt = input('Use Phase Mode? [n]\n(The shape of diffusivity curve does not change)\n')
         pp = False if 'y' in ipt or 'Y' in ipt else True
     else:
         pp = False
@@ -112,9 +112,9 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
                 ita_finish()
                 break
 
-            # If use per-point mode
+            # If use Point Mode
             if diffsys_sim.Xspl is not None:
-                ipt = ask_input('Use per-point mode? [y]')
+                ipt = ask_input('Use Point Mode (y) or Phase Mode (n)? [y]')
                 pp = False if 'n' in ipt or 'N' in ipt else True
                 if pp:
                     for ph in range(diffsys_sim.Np):
@@ -127,9 +127,9 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
                     ita_finish()
                     continue
 
-            # Whole-phase mode, ask if use manual input for
+            # Phase Mode, ask if use manual input for each phase
             pp = False
-            ipt = input('Whole-phase mode\nManually input for each phase? [n]')
+            ipt = input('Phase Mode\nManually input for each phase? [n]')
             manual = True if 'y' in ipt or 'Y' in ipt else False
             for ph in range(diffsys_sim.Np):
                 if manual:

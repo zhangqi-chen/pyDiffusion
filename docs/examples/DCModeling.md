@@ -41,11 +41,11 @@ Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]
 
 At first, the function asks using whether **Spline** or **UnivariateSpline**:
 
-**Spline**: Need to select points (>0) as reference points for spline fitting. Can use both **Per-Point Mode** and **Whole-Phase Mode** in the following **Forward Simulation Analysis (FSA)**.
+**Spline**: Need to select points (>0) as reference points for spline fitting. Can use both **Point Mode** and **Phase Mode** in the following **Forward Simulation Analysis (FSA)**.
 
-**UnivariateSpline**: Need to select range (2 points) for reliable data fitting. Can only use **Whole-Phase Mode** in the following **FSA**.
+**UnivariateSpline**: Need to select range (2 points) for reliable data fitting. Can only use **Phase Mode** in the following **FSA**.
 
-(Please see definitions of **Per-Point Mode** and **Whole-Phase Mode** in **FSA** example)
+(Please see definitions of **Point Mode** and **Phase Mode** in **FSA** example)
 
 In this example, we are using Spline method for all of 3 phases.
 
@@ -119,7 +119,7 @@ plt.show()
 
 ## DC modeling automatically
 
-`Dmodel` function can also automatically model the diffusion coefficients if `Xspl` is provided.
+`Dmodel` function can also automatically model the diffusion coefficients if `Xspl` is provided. You only need to choose from either **Spline** or **UnivariateSpline** during DC modeling.
 
 ```python
 Xspl = [[.05, .2],
