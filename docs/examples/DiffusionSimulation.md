@@ -1,6 +1,6 @@
 # Diffusion Simulation
 
-Here are few examples of how to use 'pydiffusion.mphSim' to perform diffusion simulations.
+Here are few examples of how to use `pydiffusion.mphSim` to perform diffusion simulations.
 
 ```python
 import numpy as np
