@@ -240,7 +240,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
     return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6)
 
 
-def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
+def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
                   accuracy=1e-3, output=True):
     """
     Error analysis of diffusion coefficients through comparison with experimental
@@ -264,6 +264,9 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
         loc indicates the locations to perform error analysis. If loc is an
         integer, loc points are selected inside each phase. Each point has
         both positive and negative error to be calculated.
+    w : list
+        Weights of each phase to calculate error.
+        Passed to 'pydiffusion.utils.error_profile'.
     accuracy : float
         Stop criterion of each simulation: within error_cap * (1+-accuracy).
         Low accuracy value may increase simulation times for each point.
@@ -283,7 +286,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
         print('Wrong type for time variable')
 
     profile_ref = mphSim(profile_init, diffsys, time, output=output)
-    error_ref = error_profile(profile_ref, profile_exp)
+    error_ref = error_profile(profile_ref, profile_exp, w)
     ipt = input('Reference error= % .6f. Input cap error: [% .6f]' % (error_ref, error_ref*1.01))
     error_cap = error_ref*1.01 if ipt == '' else float(ipt)
     print('Cap error = % .6f' % error_cap)
@@ -308,7 +311,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10,
                 n_sim += 1
                 diffsys_error = DCbias(diffsys, X, deltaD)
                 profile_error = mphSim(profile_init, diffsys_error, time, output=output)
-                error_sim = error_profile(profile_error, profile_exp)
+                error_sim = error_profile(profile_error, profile_exp, w)
                 if output:
                     print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'
                           % (X, n_sim, deltaD, error_sim, error_cap))

@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev
 from pydiffusion.Dmodel import SF
+from pydiffusion.utils import profilefunc
 
 
 def profileplot(profile, ax=None, err=None, **kwargs):
@@ -33,10 +34,16 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     # Error analysis result plot
     if err is not None:
         profiles = err.profiles['error']
+        funcs = []
         for i in range(len(profiles)):
             p = profiles[i]
-            ax.plot(p[0].dis, p[0].X, 'r--', lw=1)
-            ax.plot(p[1].dis, p[1].X, 'r--', lw=1)
+            funcs += [profilefunc(p[0]), profilefunc(p[1])]
+        disp = np.linspace(dis[0], dis[-1], 1e4)
+        Xp = np.zeros((len(funcs), len(disp)))
+        for i in range(len(funcs)):
+            Xp[i] = splev(disp, funcs[i])
+        ax.plot(disp, Xp.min(0), 'r--', lw=2)
+        ax.plot(disp, Xp.max(0), 'r--', lw=2)
 
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)

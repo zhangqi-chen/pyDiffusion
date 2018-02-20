@@ -159,7 +159,7 @@ def matanocalc(profile, Xlim=[]):
     return (np.trapz(X, dis)-dis[-1]*XR+dis[0]*XL)/(XL-XR)
 
 
-def error_profile(profilesim, profileexp):
+def error_profile(profilesim, profileexp, w=None):
     """
     Calculate the difference (in mole fraction) between experimental profile
     and simulated profile. This function take profilesim as reference, i.e.
@@ -171,6 +171,8 @@ def error_profile(profilesim, profileexp):
         Simulated diffusion profile.
     profileexp : DiffProfile
         Experiemntal measured profile.
+    w : list, optional
+        Weights of each phase, default is equal weights.
 
     Returns
     -------
@@ -180,15 +182,30 @@ def error_profile(profilesim, profileexp):
     fX = profilefunc(profilesim)
     dissim, Xsim = profilesim.dis, profilesim.X
     disexp, Xexp = profileexp.dis, profileexp.X
-    error = 0
+    If = []
+    for i in range(len(dissim)-1):
+        if dissim[i] == dissim[i+1]:
+            If += [dissim[i]]
+    Np = len(If)+1
+    if w is not None and len(w) != Np:
+        raise ValueError('Length of w must equal to number of phases.')
+    if w is None:
+        w = [1]*Np
+    If += [disexp[-1]+1]
+    error, n = 0, 0
     for i in range(len(disexp)):
+        for j in range(Np):
+            if disexp[i] < If[j]:
+                wi = w[j]
+                break
+        n += wi
         if disexp[i] < dissim[0]:
-            error += abs(Xexp[i]-Xsim[0])
+            error += abs(Xexp[i]-Xsim[0])*wi
         elif disexp[i] > dissim[-1]:
-            error += abs(Xexp[i]-Xsim[-1])
+            error += abs(Xexp[i]-Xsim[-1])*wi
         else:
-            error += abs(Xexp[i]-splev(disexp[i], fX))
-    return error / len(disexp)
+            error += abs(Xexp[i]-splev(disexp[i], fX))*wi
+    return error / n
 
 
 def efunc_default(X, Xf, r):

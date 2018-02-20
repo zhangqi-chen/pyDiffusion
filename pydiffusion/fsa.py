@@ -10,7 +10,7 @@ from pydiffusion.simulation import mphSim
 from pydiffusion.io import ita_start, ita_finish, ask_input
 
 
-def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
+def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
@@ -33,6 +33,9 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
     n : list
         Passed to 'pydiffusion.utils.mesh'.
         Meshing number range, default = [400, 500].
+    w : list
+        Weights of each phase to calculate error.
+        Passed to 'pydiffusion.utils.error_profile'.
 
     Returns
     -------
@@ -79,7 +82,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500]):
         # Simulation
         n_sim += 1
         profile_sim = mphSim(profile_init, diffsys_sim, time)
-        error_sim = error_profile(profile_sim, profile_exp)
+        error_sim = error_profile(profile_sim, profile_exp, w)
         print('Simulation %i, error = %f(%f)' % (n_sim, error_sim, error_stop))
 
         # Plot simulation results
