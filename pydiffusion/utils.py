@@ -1,5 +1,5 @@
 """
-The util module provides tools for diffusion data processing and analysis.
+The utils module provides tools for diffusion data processing and analysis.
 """
 
 import numpy as np
@@ -9,7 +9,7 @@ from pydiffusion.core import DiffProfile, DiffSystem
 
 def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     """
-    Meshing for fast simulation similiar to existing profile.
+    Meshing for fast simulation similar to existing profile.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     n : list
         meshing number range, default = [400, 500]
     f : function of meshing
-        Meshing grid size is propotional to f(DC), default = DC**0.3
+        Meshing grid size is proportional to f(DC), default = DC**0.3
         DC is diffusion coefficients.
 
     Returns
@@ -43,7 +43,7 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
             disn[i+1] += (disn[i+2]-disn[i+1])/1e5
     fX = splrep(disn, X, k=1)
 
-    # Create universel D function fDC
+    # Create universal D function fDC
     Xf, Df = np.array([]), np.array([])
     for i in range(len(fD)):
         Xnew = np.linspace(Xr[i, 0], Xr[i, 1], 20)
@@ -73,7 +73,7 @@ def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
 
 def step(dis, matano, diffsys, Xlim=[]):
     """
-    Create a step profile at the matano plane.
+    Create a step profile at the Matano Plane.
 
     Parameters
     ----------

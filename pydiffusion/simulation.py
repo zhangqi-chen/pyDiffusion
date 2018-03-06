@@ -183,7 +183,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
         if liquid != 1:
             Xs[-1] += Jf[-1]/d[-1]*dt
 
-        # If one phase comsumed, delete this phase
+        # If one phase consumed, delete this phase
         if If[1]+vIf[1]*dt <= dis[0]:
             Xs[0] = Xr[1, 0]
             Np -= 1
@@ -241,7 +241,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
 
 
 def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
-                  accuracy=1e-3, output=True):
+                  accuracy=1e-3, output=False):
     """
     Error analysis of diffusion coefficients through comparison with experimental
     data.
@@ -271,7 +271,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
         Stop criterion of each simulation: within error_cap * (1+-accuracy).
         Low accuracy value may increase simulation times for each point.
     output : boolean, optional
-        Print analysis progress, default = True.
+        Print each simulation results, default = False.
 
     Returns
     -------
@@ -332,12 +332,12 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
                     j = 1 if error_sim > error_cap else 0
                     De[j], Xe[j] = deltaD, error_sim
 
-                    if (Xe[1]-Xe[0])/abs(De[1]-De[0]) > 100:
-                        deltaD = De[0]
+                    if (Xe[1]-Xe[0])/abs(De[1]-De[0]) > 10:
+                        deltaD, error_sim = De[0], Xe[0]
                         if output:
                             print('Jump between %f and %f' % (De[0], De[1]))
                         break
-                    elif (Xe[1]-Xe[0]) > abs(De[1]-De[0]) and n_sim > 4:
+                    elif n_sim > 6:
                         deltaD = np.mean(De)
                     else:
                         fe = splrep(Xe, De, k=1)

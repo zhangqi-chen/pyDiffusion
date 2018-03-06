@@ -55,9 +55,9 @@ class DiffSystem(object):
         Concentration range for each phase, default = [0,1].
         Save Xr.shape[0] to phase number DiffSystem.Np.
     Dfunc : list of tck tuple, optional
-        Np of tck tuple discribe the diffusion coefficient function for each phase.
+        Np of tck tuple describe the diffusion coefficient function for each phase.
     X, DC : array-like, optional
-        Use exsiting data to model Dfunc.
+        Use existing data to model Dfunc.
     Xspl : list of array, optional
         Xspl is the reference locations to create Dfunc, useful for forward
         simulation analysis.

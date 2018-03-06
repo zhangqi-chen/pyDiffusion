@@ -1,5 +1,5 @@
 """
-The plot module provides support for virtualization of diffusion profile data
+The plot module provides support for visualization of diffusion profile data
 and diffusion coefficients data using matplotlib.
 """
 
@@ -42,7 +42,7 @@ def profileplot(profile, ax=None, err=None, **kwargs):
         Xp = np.zeros((len(funcs), len(disp)))
         for i in range(len(funcs)):
             Xp[i] = splev(disp, funcs[i])
-        ax.plot(disp, Xp.min(0), 'r--', lw=2)
+        ax.plot(disp, Xp.min(0), 'r--', lw=2, label='Error')
         ax.plot(disp, Xp.max(0), 'r--', lw=2)
 
     ax.set_xlabel('Distance (micron)', fontsize=15)
@@ -120,7 +120,7 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
         for i in range(Np):
             pid = np.where((loc >= Xr[i, 0]) & (loc <= Xr[i, 1]))[0]
             Dloc = np.exp(splev(loc[pid], fD[i]))
-            ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2)
+            ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2, label='Error')
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 1], 'r--', lw=2)
 
     ax.set_xlim(Xr[0, 0], Xr[-1, 1])
