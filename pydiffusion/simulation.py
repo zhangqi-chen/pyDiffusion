@@ -6,7 +6,7 @@ simulation-based error analysis tools.
 import numpy as np
 from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile, DiffError
-from pydiffusion.utils import error_profile, DCbias
+from pydiffusion.utils import error_profile, DCbias, profilefunc
 
 
 def sphSim(profile, diffsys, time, output=True):
@@ -297,15 +297,18 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
         for i in range(diffsys.Np):
             loc = np.append(loc, np.linspace(diffsys.Xr[i, 0], diffsys.Xr[i, 1], n))
 
-    profiles = []
+    dis_compare = np.linspace(profile_init.dis[0], profile_init.dis[-1], 1e4)
+    profile_compare = np.zeros((3, len(dis_compare)))
+    profile_compare[0] = splev(dis_compare, profilefunc(profile_ref))
+    profile_compare[2] = splev(dis_compare, profilefunc(profile_ref))
+
     errors = np.zeros((len(loc), 2))
-    deltaD = -0.5
+    deltaD_init = [0.5, -0.5]
     for i in range(len(loc)):
         X = loc[i]
-        profile_at_X = []
         for p in range(2):
             n_sim = 0
-            deltaD = -deltaD
+            deltaD = deltaD_init[p]*1.1
             De, Xe = [0], [error_ref]
             while True:
                 n_sim += 1
@@ -316,7 +319,13 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
                     print('At %.3f, simulation #%i, deltaD = %f, profile difference = %f(%f)'
                           % (X, n_sim, deltaD, error_sim, error_cap))
 
-                if abs(error_sim-error_cap) < error_cap*accuracy:
+                if error_sim <= error_cap:
+                    profile_new = profilefunc(profile_error)
+                    profile_compare[1] = splev(dis_compare, profile_new)
+                    profile_compare[0] = profile_compare[:2].min(0)
+                    profile_compare[2] = profile_compare[1:].max(0)
+
+                if error_sim > error_cap*(1-accuracy) and error_sim <= error_cap:
                     break
 
                 if len(De) == 1:
@@ -345,9 +354,10 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
             direction = 'positive' if p == 0 else 'negative'
             print('Error (%s) at %.3f = %f, %i simulations performed, profile difference = %f'
                   % (direction, X, deltaD, n_sim, error_sim))
-            profile_at_X += [profile_error]
             errors[i, p] = deltaD
-        profiles += [profile_at_X]
+            deltaD_init[p] = deltaD
+        profiles = (splrep(dis_compare, profile_compare[0], k=1),
+                    splrep(dis_compare, profile_compare[2], k=1))
         data = {}
         data['exp'] = profile_exp
         data['ref'] = profile_ref

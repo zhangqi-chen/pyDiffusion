@@ -7,7 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev
 from pydiffusion.Dmodel import SF
-from pydiffusion.utils import profilefunc
 
 
 def profileplot(profile, ax=None, err=None, **kwargs):
@@ -34,16 +33,12 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     # Error analysis result plot
     if err is not None:
         profiles = err.profiles['error']
-        funcs = []
-        for i in range(len(profiles)):
-            p = profiles[i]
-            funcs += [profilefunc(p[0]), profilefunc(p[1])]
         disp = np.linspace(dis[0], dis[-1], 1e4)
-        Xp = np.zeros((len(funcs), len(disp)))
-        for i in range(len(funcs)):
-            Xp[i] = splev(disp, funcs[i])
-        ax.plot(disp, Xp.min(0), 'r--', lw=2, label='Error')
-        ax.plot(disp, Xp.max(0), 'r--', lw=2)
+        Xp = np.zeros((2, len(disp)))
+        for i in range(2):
+            Xp[i] = splev(disp, profiles[i])
+        ax.plot(disp, Xp[0], 'r--', lw=2, label='Error')
+        ax.plot(disp, Xp[1], 'r--', lw=2)
 
     ax.set_xlabel('Distance (micron)', fontsize=15)
     ax.set_ylabel('Mole fraction', fontsize=15)
@@ -104,15 +99,18 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
     clw = {'c': 'b', 'lw': 2}
     args = {**clw, **kwargs}
+    clw_nl = {'label': '_nolegend_'}
+    args_nl = {**args, **clw_nl}
     # Diffusion Coefficients plot
     for i in range(Np):
         Xp = np.linspace(Xr[i, 0], Xr[i, 1], 51)
         Dp = np.exp(splev(Xp, fD[i]))
         if i == 0:
             Dmin, Dmax = min(Dp), max(Dp)
+            ax.semilogy(Xp, Dp, **args)
         else:
             Dmin, Dmax = min(Dmin, min(Dp)), max(Dmax, max(Dp))
-        ax.semilogy(Xp, Dp, **args)
+            ax.semilogy(Xp, Dp, **args_nl)
 
     # Error analysis result plot
     if err is not None:
@@ -120,7 +118,10 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
         for i in range(Np):
             pid = np.where((loc >= Xr[i, 0]) & (loc <= Xr[i, 1]))[0]
             Dloc = np.exp(splev(loc[pid], fD[i]))
-            ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2, label='Error')
+            if i == 0:
+                ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2, label='Error')
+            else:
+                ax.semilogy(loc[pid], Dloc * 10**errors[pid, 0], 'r--', lw=2)
             ax.semilogy(loc[pid], Dloc * 10**errors[pid, 1], 'r--', lw=2)
 
     ax.set_xlim(Xr[0, 0], Xr[-1, 1])

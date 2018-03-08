@@ -128,10 +128,7 @@ class DiffError(object):
     """
 
     def __init__(self, diffsys, loc, errors, profiles=None):
-        if isinstance(diffsys, DiffSystem):
-            self.diffsys = diffsys
-        else:
-            raise TypeError('DiffSystem type is required')
+        self.diffsys = diffsys
         self.loc = np.array(loc)
         self.errors = errors
         if profiles is not None:
