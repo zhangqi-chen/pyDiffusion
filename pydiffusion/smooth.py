@@ -125,6 +125,11 @@ def datasmooth(profile, interface=[], n=2000):
     Ip = [0]*(Np+1)
     disn, Xn = dis.copy(), X.copy()
 
+    # Two distance value is the same
+    for i in range(len(disn)-1):
+        if disn[i] == disn[i+1]:
+            disn[i+1] += 1e-5
+
     ita_start()
 
     # Apply phasesmooth to each phase
