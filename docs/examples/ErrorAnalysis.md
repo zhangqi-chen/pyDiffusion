@@ -5,7 +5,7 @@ Here is an example of how to analyze the uncertainty of diffusion coefficients d
 ```python
 import matplotlib.pyplot as plt
 from pydiffusion.io import read_csv
-from pydiffusion.utils import step, mesh, matanocalc, DCbias
+from pydiffusion.utils import step, automesh, matanocalc, DCbias
 from pydiffusion.simulation import ErrorAnalysis
 from pydiffusion.plot import DCplot
 ```
@@ -33,7 +33,7 @@ plt.show()
 Here is an example showing error analysis of Ti-Zr 1000C data, calculating 3 positions at (0, 0.5, 1.0). Low accuracy this time.
 
 ```python
-dism = mesh(profile_fsa, diffsys_TiZr, [300, 350])
+dism = automesh(profile_fsa, diffsys_TiZr, [300, 350])
 mp = matanocalc(profile_fsa, [0, 1])
 profile_init = step(dism, mp, diffsys_TiZr)
 time = 100*3600

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from pydiffusion.io import read_csv
-from pydiffusion.utils import step, mesh, matanocalc, DCbias
+from pydiffusion.utils import step, automesh, matanocalc, DCbias
 from pydiffusion.simulation import ErrorAnalysis
 from pydiffusion.plot import DCplot, profileplot
 
@@ -16,7 +16,7 @@ plt.legend(fontsize=15)
 plt.show()
 
 # Error analysis with low accuracy
-dism = mesh(profile_fsa, diffsys_TiZr, [300, 350])
+dism = automesh(profile_fsa, diffsys_TiZr, [300, 350])
 mp = matanocalc(profile_fsa, [0, 1])
 profile_init = step(dism, mp, diffsys_TiZr)
 time = 100*3600

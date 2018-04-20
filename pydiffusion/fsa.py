@@ -3,7 +3,7 @@ The fsa module provides tools to perform Forward Simulation Analysis (FSA).
 """
 import matplotlib.pyplot as plt
 from pydiffusion.core import DiffSystem
-from pydiffusion.utils import error_profile, step, matanocalc, mesh
+from pydiffusion.utils import error_profile, step, matanocalc, automesh
 from pydiffusion.Dmodel import Dadjust
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.simulation import mphSim
@@ -31,7 +31,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
         Indicates the left and right concentration limits for calculation.
         Default value = [profile.X[0], profile.X[-1]].
     n : list
-        Passed to 'pydiffusion.utils.mesh'.
+        Passed to 'pydiffusion.utils.automesh'.
         Meshing number range, default = [400, 500].
     w : list
         Weights of each phase to calculate error.
@@ -45,7 +45,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
         Calculated diffusion efficients by FSA.
     """
     # Create step profile on meshed grids
-    dism = mesh(profile_sm, diffsys, n)
+    dism = automesh(profile_sm, diffsys, n)
     matano = matanocalc(profile_sm, Xlim)
     profile_init = step(dism, matano, diffsys, Xlim)
 

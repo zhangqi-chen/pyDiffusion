@@ -7,7 +7,39 @@ from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile, DiffSystem
 
 
-def mesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
+def mesh(start=0, end=500, n=200, a=0):
+    """
+    Meshing for diffusion grids
+
+    Parameters
+    ----------
+    start, end : float
+        Start & end location for diffusion grids.
+    n : int
+        Grid number of meshing.
+    a : float
+    Parameter for nonlinear meshing.
+        = 0 : Linear meshing with equal grid size.
+        > 0 : Nonlinear meshing with increasing grid size.
+        < 0 : Nonlinear meshing with decreasing grid size.
+
+    Returns
+    -------
+    dis : numpy.array
+        Meshed grids information.
+    """
+    if a == 0:
+        dis = np.linspace(start, end, n)
+    elif a > 0:
+        dis = np.array([start+(end-start)*np.sinh(i*a/(n-1))/np.sinh(a) for i in range(n)])
+    else:
+        dis = np.array([end-(end-start)*np.sinh(i*a/(1-n))/np.sinh(-a) for i in range(n-1, -1, -1)])
+    d = dis[1:]-dis[:-1]
+    print('Meshing completed. Grid min=%.3f, max=%.3f' % (min(d), max(d)))
+    return dis
+
+
+def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     """
     Meshing for fast simulation similar to existing profile.
 
