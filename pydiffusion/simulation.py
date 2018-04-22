@@ -193,7 +193,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
             vIf = np.zeros(Np+1)
             if output:
                 print('First phase consumed, %i phase(s) left, time = %.3f hrs' % (Np, t/3600))
-        elif If[-2]*vIf[-2]*dt >= dis[-1]:
+        elif If[-2]+vIf[-2]*dt >= dis[-1]:
             Xs[-1] = Xr[-2, 1]
             Np -= 1
             Xr, If, Ip, fD = Xr[:-1], If[:-1], Ip[:-1], fD[:-1]
