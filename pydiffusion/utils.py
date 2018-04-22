@@ -18,7 +18,7 @@ def mesh(start=0, end=500, n=200, a=0):
     n : int
         Grid number of meshing.
     a : float
-    Parameter for nonlinear meshing.
+        Parameter for nonlinear meshing.
         = 0 : Linear meshing with equal grid size.
         > 0 : Nonlinear meshing with increasing grid size.
         < 0 : Nonlinear meshing with decreasing grid size.
@@ -113,7 +113,7 @@ def step(dis, matano, diffsys, Xlim=[]):
         Distance information.
     matano : float
         Matano plane location (micron).
-    diffsys : pydiffusion.diffusion.DiffSystem
+    diffsys : DiffSystem
         The diffusion system information for initial setups before simulation.
     Xlim : list (float), optional
         Indicates the left and right concentration limits for step profile.
