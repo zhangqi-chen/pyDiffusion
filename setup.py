@@ -1,17 +1,54 @@
 from setuptools import setup
 
+long_description = """
+===========
+pyDiffusion
+===========
+
+.. image:: https://img.shields.io/pypi/v/pydiffusion.svg
+    :target: https://pypi.python.org/pypi/pydiffusion/
+    :alt: Latest version
+
+.. image:: https://img.shields.io/pypi/pyversions/pydiffusion.svg
+    :target: https://pypi.python.org/pypi/pydiffusion/
+    :alt: Supported Python versions
+
+.. image:: https://img.shields.io/pypi/l/pydiffusion.svg
+    :target: https://pypi.python.org/pypi/pydiffusion/
+    :alt: License
+
+**pyDiffusion** combines tools like **diffusion simulation**, **diffusion data smooth**, **forward simulation analysis (FSA)**, etc. to help people analyze diffusion data efficiently.
+
+Dependencies
+------------
+
+* Python 3.5+
+* numpy, matplotlib, scipy, pandas
+
+Installation
+------------
+
+Via pip (recommend):
+
+.. code-block::
+
+    pip install pydiffusion
+
+"""
+
 setup(
     name='pydiffusion',
-    version='0.2',
+    version='0.1.0',
     packages=['pydiffusion'],
     include_package_data=True,
-    python_requires='>=3',
+    python_requires='>=3.5',
     install_requires=['numpy', 'matplotlib', 'scipy', 'pandas'],
 
     # metadata
     author='Zhangqi Chen',
     author_email='wshchzhq@gmail.com',
     description='A Python library for diffusion simulation and data analysis',
+    long_description=long_description,
     license='MIT',
     url='https://github.com/zhangqi-chen/pyDiffusion',
 

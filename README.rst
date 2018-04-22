@@ -1,3 +1,4 @@
+===========
 pyDiffusion
 ===========
 
@@ -23,8 +24,12 @@ Dependencies
 
 Installation
 ------------
-Via pip(recommend)::
-    pip install vaspy
+
+Via pip(recommend)
+
+.. code-block::
+
+    pip install pydiffusion
 
 Examples
 --------
@@ -41,7 +46,7 @@ Forward Simulation Analysis (FSA)
 
 Calculate interdiffusion coefficients of Ni-Mo at 1100C based on raw diffusion data (1000 hours). See 'FSA Example'_
 
-.. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ForwardSimulationAnalysis_files/ForwardSimVulationAnalysis_2.png
+.. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ForwardSimulationAnalysis_files/ForwardSimulationAnalysis_2.png
 
 Error Analysis
 ~~~~~~~~~~~~~~
