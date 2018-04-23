@@ -73,7 +73,7 @@ The data required for diffusion simulation is the diffusion coefficients and sol
 
 .. code-block:: python
 
-    data = pd.read_csv('NiMo.csv')
+    data = pd.read_csv('data/NiMo.csv')
     X, DC = data['X'], data['DC']
     Xr = np.array([[0, 0.25],
                 [0.49, 0.53],
@@ -86,7 +86,7 @@ You can also use `pydiffusion.io.read_csv` to read diffusion coefficients direct
 
 .. code-block:: python
 
-    _, diffsys_NiMo = read_csv('NiMo.csv', [0, 1])
+    _, diffsys_NiMo = read_csv('data/NiMo.csv', [0, 1])
 
 Then create initial step profile as above.
 

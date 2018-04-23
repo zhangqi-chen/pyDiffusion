@@ -4,7 +4,7 @@ from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.Dmodel import Dmodel
 
 # Read smoothed NiMo data
-NiMo_sm, _ = read_csv('NiMo_sm.csv')
+NiMo_sm, _ = read_csv('data/NiMo_sm.csv')
 
 ax = plt.figure(figsize=(8, 6)).add_subplot(111)
 profileplot(NiMo_sm, ax)

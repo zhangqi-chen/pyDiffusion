@@ -19,8 +19,8 @@ The error is analyzed by creating a bias on diffusion coefficients, this can be 
 
 .. code-block:: python
 
-    profile_fsa, diffsys_TiZr = read_csv('examples/TiZr.csv', [0, 1])
-    profile_exp, _ = read_csv('examples/TiZr_exp.csv')
+    profile_fsa, diffsys_TiZr = read_csv('data/TiZr.csv', [0, 1])
+    profile_exp, _ = read_csv('data/TiZr_exp.csv')
     diffsys_bias = DCbias(diffsys_TiZr, 0.2, 0.1)
 
     ax = plt.figure(figsize=(8, 6)).add_subplot(111)

@@ -4,8 +4,8 @@ from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.fsa import FSA
 
 # Read required data for FSA
-NiMo_sm, diffsys_init = read_csv('NiMo_DC_init.csv')
-NiMo_exp, _ = read_csv('NiMo_exp.csv')
+NiMo_sm, diffsys_init = read_csv('data/NiMo_DC_init.csv')
+NiMo_exp, _ = read_csv('data/NiMo_exp.csv')
 Xp = [[.05, .2],
       [.5, .515],
       [.985]]

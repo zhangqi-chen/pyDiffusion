@@ -32,15 +32,15 @@ profileplot(profile_final, ax, c='r')
 plt.show()
 
 # Read diffusion coefficients data of Ni-Mo system
-data = pd.read_csv('NiMo.csv')
+data = pd.read_csv('data/NiMo.csv')
 X, DC = data['X'], data['DC']
 Xr = np.array([[0, 0.25],
                [0.49, 0.53],
                [0.97, 1]])
 diffsys_NiMo = DiffSystem(Xr=Xr, X=X, DC=DC)
 
-# Read diffusion coefficients from saved data file
-_, diffsys_NiMo = read_csv('NiMo.csv', [0, 1])
+# Read diffusion coefficients from saved data file by pydiffusion.io.save_csv
+_, diffsys_NiMo = read_csv('data/NiMo.csv', [0, 1])
 
 # Create initial step profile
 dis = mesh(0, 400, 301)

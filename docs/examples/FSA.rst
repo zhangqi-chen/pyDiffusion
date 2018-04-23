@@ -16,12 +16,12 @@ Read data from previous data smoothing & DC modeling
 
 Here we read previous results of Ni-Mo 1100C 1000 hours datasets, and plot them out.
 
-(The Xspl info required to input manually if initial DC modeling is read from file)
+(The ``Xspl`` info required to input manually if initial DC modeling is read from file)
 
 .. code-block:: python
 
-    NiMo_sm, diffsys_init = read_csv('examples/NiMo_DC_init.csv')
-    NiMo_exp, _ = read_csv('examples/NiMo_exp.csv')
+    NiMo_sm, diffsys_init = read_csv('data/NiMo_DC_init.csv')
+    NiMo_exp, _ = read_csv('data/NiMo_exp.csv')
     Xp = [[.05, .2],
         [.5, .515],
         [.985]]

@@ -22,7 +22,7 @@ Raw diffusion profile data can be represented by a ``DiffProfile`` object, which
 
 .. code-block:: python
 
-    data = pd.read_csv('NiMo_exp.csv')
+    data = pd.read_csv('data/NiMo_exp.csv')
     dis, X = data['dis'], data['X']
     NiMo_exp = DiffProfile(dis=dis, X=X)
 
@@ -32,7 +32,7 @@ Profile data can also be read from a saved .csv file.
 
 .. code-block:: python
 
-    NiMo_exp, _ = read_csv('NiMo_exp.csv')
+    NiMo_exp, _ = read_csv('data/NiMo_exp.csv')
 
 Plot the raw data
 

@@ -20,7 +20,7 @@ Read smoothed profile data of Ni-Mo 1100C 1000 hours.
 
 .. code-block:: python
 
-    NiMo_sm, _ = read_csv('examples/NiMo_sm.csv')
+    NiMo_sm, _ = read_csv('data/NiMo_sm.csv')
 
     ax = plt.figure(figsize=(8, 6)).add_subplot(111)
     profileplot(NiMo_sm, ax)
