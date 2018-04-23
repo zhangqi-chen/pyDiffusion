@@ -2,6 +2,10 @@
 pyDiffusion
 ===========
 
+.. image:: https://img.shields.io/pypi/status/pydiffusion.svg
+    :target: https://pypi.python.org/pypi/pydiffusion/
+    :alt: Development Status
+
 .. image:: https://img.shields.io/pypi/v/pydiffusion.svg
     :target: https://pypi.python.org/pypi/pydiffusion/
     :alt: Latest version
@@ -55,6 +59,6 @@ The interdiffusion coefficients in Ti-Zr system at 1000C are calculated using FS
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis_files/ErrorAnalysis_3.png
 
-.. _Diffusion Simulation Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation.md
-.. _FSA Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ForwardSimulationAnalysis.md
-.. _Error Analysis Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis.md
+.. _Diffusion Simulation Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation.rst
+.. _FSA Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA.rst
+.. _Error Analysis Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis.rst

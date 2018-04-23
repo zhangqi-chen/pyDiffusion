@@ -1,4 +1,5 @@
 from setuptools import setup
+from pydiffusion import __version__ as version
 
 long_description = """
 ===========
@@ -38,7 +39,7 @@ Via pip (recommend):
 
 setup(
     name='pydiffusion',
-    version='0.1.0',
+    version=version,
     packages=['pydiffusion'],
     include_package_data=True,
     python_requires='>=3.5',
