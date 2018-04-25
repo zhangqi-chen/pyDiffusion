@@ -119,7 +119,7 @@ Plot results
 Save simulation results
 -----------------------
 
-Both diffusion profile and diffusion coefficient information can be saved into .csv format by pydiffusion. So that you can read it next time by `read_csv`. It is recommended to save both profile and diffusion coefficients at the same time.
+Both diffusion profile and diffusion coefficient information can be saved into .csv format by pydiffusion. So that you can read it next time by ``read_csv``. It is recommended to save both profile and diffusion coefficients at the same time.
 
 .. code-block:: python
 

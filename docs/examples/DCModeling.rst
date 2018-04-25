@@ -145,9 +145,9 @@ Usually smoothed profile and initial DC settings are saved together preparing fo
 
     save_csv('NiMo_DC_init.csv', profile=NiMo_sm, diffsys=diffsys_init_auto)
 
-Make sure you remember the Xspl info if you are going to read data from .csv file before FSA!
+Make sure you remember the ``Xspl`` info if you are going to read data from .csv file before FSA!
 
-After **Data Smoothing** and **DC Modeling**, you can go ahead to perform Forward Simulation Analysis, see example__.
+After **Data Smoothing** and **DC Modeling**, you can go ahead to perform **Forward Simulation Analysis**, see example__.
 
 .. _example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth.rst
 .. __: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA.rst

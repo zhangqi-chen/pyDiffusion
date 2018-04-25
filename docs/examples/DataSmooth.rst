@@ -133,6 +133,6 @@ Smoothe profile can be saved as .csv, which can be read directly by ``read_csv``
 
     save_csv('NiMo_sm.csv', profile=NiMo_sm)
 
-After data smoothing, diffusion coefficients modeling is required before FSA, see example_.
+After **Data Smoothing**, **Diffusion Coefficients Modeling** is required before **Forward Simulation Analysis**, see example_.
 
 .. _example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DCModeling.rst

@@ -2,7 +2,7 @@
 Forward Simulation Analysis (FSA)
 =================================
 
-After **data smoothing** (example_) and initial **DC modeling** (example__) , we can perform **Forward Simulation Analysis (FSA)** to calculate accurate diffusion coefficients from diffusion profile.
+After **Data Smoothing** (example_) and initial **DC Modeling** (example__) , we can perform **Forward Simulation Analysis (FSA)** to calculate accurate diffusion coefficients from diffusion profile.
 
 .. code-block:: python
 
