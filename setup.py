@@ -6,6 +6,10 @@ long_description = """
 pyDiffusion
 ===========
 
+.. image:: https://img.shields.io/pypi/status/pydiffusion.svg
+    :target: https://pypi.python.org/pypi/pydiffusion/
+    :alt: Development Status
+
 .. image:: https://img.shields.io/pypi/v/pydiffusion.svg
     :target: https://pypi.python.org/pypi/pydiffusion/
     :alt: Latest version
@@ -70,7 +74,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
     ],

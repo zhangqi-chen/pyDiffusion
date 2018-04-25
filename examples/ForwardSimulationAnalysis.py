@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from pydiffusion.io import read_csv
+from pydiffusion.io import read_csv, save_csv
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.fsa import FSA
 
@@ -21,7 +21,7 @@ DCplot(diffsys_init, ax2, c='r', lw=2)
 plt.show()
 
 # FSA
-NiMo_sim, diffsys_fsa = FSA(NiMo_exp, NiMo_sm, diffsys_init, time, Xlim=[0, 1], n=[300, 350])
+NiMo_sim, diffsys_fsa = FSA(NiMo_exp, NiMo_sm, diffsys_init, time, Xlim=[0, 1], n=[250, 300])
 
 # Plot the results
 fig = plt.figure(figsize=(16, 6))
@@ -32,3 +32,6 @@ profileplot(NiMo_sim, ax1, c='r', lw=2)
 SFplot(NiMo_sm, time, ax=ax2, Xlim=[0, 1])
 DCplot(diffsys_fsa, ax2, c='r', lw=2)
 plt.show()
+
+# Save FSA result
+save_csv('NiMo.csv', NiMo_sim, diffsys_fsa)

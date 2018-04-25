@@ -11,7 +11,7 @@ Data smoothing can be implemented by ``pydiffusion.smooth.datasmooth``. (Current
     import pandas as pd
     import matplotlib.pyplot as plt
     from pydiffusion.core import DiffProfile
-    from pydiffusion.io import read_csv
+    from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot
     from pydiffusion.smooth import datasmooth
 
@@ -48,11 +48,11 @@ Plot the raw data
 Data smoothing
 --------------
 
-For multiple phases situation, interfaces locations are required as inputs. Ni-Mo has 3 phases at 1100C, 2 interfaces locations (311.5, 340.5) must be provided as the input for ``datasmooth``
+For multiple phases situation, interfaces locations are required as inputs. Ni-Mo has 3 phases at 1100C, 2 interfaces locations (311.5, 340.5) must be provided as the input for ``datasmooth``. ``n`` is the number of output interpolated profile, default ``n=2000``.
 
 .. code-block:: python
 
-    NiMo_sm = datasmooth(NiMo_exp, [311.5, 340.5])
+    NiMo_sm = datasmooth(NiMo_exp, [311.5, 340.5], n=500)
 
 The function will smooth 3 phases individually, each phase is smoothed in the following steps:
 
@@ -123,6 +123,15 @@ Plot smoothed results
     plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth_files/DataSmooth_3.png
+
+Save smoothed results
+---------------------
+
+Smoothe profile can be saved as .csv, which can be read directly by ``read_csv`` later.
+
+.. code-block:: python
+
+    save_csv('NiMo_sm.csv', profile=NiMo_sm)
 
 After data smoothing, diffusion coefficients modeling is required before FSA, see example_.
 

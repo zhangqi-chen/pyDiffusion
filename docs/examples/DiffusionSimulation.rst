@@ -13,7 +13,7 @@ Here are few examples of how to use ``pydiffusion.mphSim`` to perform diffusion 
     from pydiffusion.utils import step, mesh
     from pydiffusion.simulation import mphSim
     from pydiffusion.plot import profileplot, DCplot
-    from pydiffusion.io import read_csv
+    from pydiffusion.io import read_csv, save_csv
 
 Diffusion simulation by easy setups
 -----------------------------------
@@ -25,13 +25,13 @@ Usually, a diffusion simulation requires two inputs:
 1. A initial profile (``pydiffusion.core.DiffProfile``)
 2. A diffusion system with well-defined diffusion coefficients (``pydiffusion.core.DiffSystem``)
 
-Define a diffusion system with constant diffusion coefficients 10\ :sub:`-14`\ m\ :sub:`2`\/s with concentration range from 0 to 1. To accomplish this, we should create a `DiffSystem` object. Input parameters include `Xr`: solubility range, `X` and `DC`: concentration and corresponding diffusion coefficients data.
+Define a diffusion system with constant diffusion coefficients 10\ :sup:`-14`\ m\ :sup:`2`\/s with concentration range from 0 to 1. To accomplish this, we should create a ``DiffSystem`` object. Input parameters include `Xr`: solubility range, ``X`` and ``DC``: concentration and corresponding diffusion coefficients data.
 
 .. code-block:: python
 
     diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14])
 
-Then create a initial step profile (step at 500 micron, length = 1000 micron) before simulation. To accomplish this, function ``mesh`` is used to mesh grids, and `step` is used to create a step profile upon meshed grids.
+Then create a initial step profile (step at 500 micron, length = 1000 micron) before simulation. To accomplish this, function ``mesh`` is used to mesh grids, and ``step`` is used to create a step profile upon meshed grids.
 
 .. code-block:: python
 
@@ -115,3 +115,12 @@ Plot results
     plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation_files/DiffusionSimulation_3.png
+
+Save simulation results
+-----------------------
+
+Both diffusion profile and diffusion coefficient information can be saved into .csv format by pydiffusion. So that you can read it next time by `read_csv`. It is recommended to save both profile and diffusion coefficients at the same time.
+
+.. code-block:: python
+
+    save_csv('NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)

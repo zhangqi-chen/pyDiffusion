@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from pydiffusion.io import read_csv
+from pydiffusion.io import read_csv, save_csv
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.Dmodel import Dmodel
 
@@ -25,3 +25,6 @@ Xspl = [[.05, .2],
         [.5, .515],
         [.985]]
 diffsys_init_auto = Dmodel(NiMo_sm, time, Xspl=Xspl, Xlim=[0, 1])
+
+# Save result
+save_csv('NiMo_DC_init.csv', profile=NiMo_sm, diffsys=diffsys_init_auto)

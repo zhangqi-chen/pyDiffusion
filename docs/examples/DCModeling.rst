@@ -2,14 +2,14 @@
 Diffusion Coefficients (DC) Modeling
 ====================================
 
-Before **Forward Simulation Analysis (FSA)**, an initial modeling of diffusion coefficients is required. It is recommend to perform **Data Smoothing** before **DC modeling**.
+Before **Forward Simulation Analysis (FSA)**, an initial modeling of diffusion coefficients is required. It is recommend to perform **Data Smoothing** (example_) before **DC modeling**.
 
 **DC modeling** can be implemented by ``pydiffusion.Dmodel.Dmodel``. Same with data smoothing, it requires many manually inputs during the process. (Currently doen't support ``matplotlib inline``) Here is an example for DC modeling of smoothed Ni-Mo 1100C 1000 hours data.
 
 .. code-block:: python
 
     import matplotlib.pyplot as plt
-    from pydiffusion.io import read_csv
+    from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot, DCplot, SFplot
     from pydiffusion.Dmodel import Dmodel
 
@@ -136,6 +136,18 @@ DC modeling automatically
             [.985]]
     diffsys_init_auto = Dmodel(NiMo_sm, time, Xspl=Xspl, Xlim=[0, 1])
 
-After **Data Smoothing** and **DC Modeling**, you can go ahead to perform Forward Simulation Analysis, see example_.
+Save both smoothed profile and initial DC settings
+--------------------------------------------------
 
-.. _example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA.rst
+Usually smoothed profile and initial DC settings are saved together preparing for FSA.
+
+.. code-block:: python
+
+    save_csv('NiMo_DC_init.csv', profile=NiMo_sm, diffsys=diffsys_init_auto)
+
+Make sure you remember the Xspl info if you are going to read data from .csv file before FSA!
+
+After **Data Smoothing** and **DC Modeling**, you can go ahead to perform Forward Simulation Analysis, see example__.
+
+.. _example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth.rst
+.. __: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA.rst

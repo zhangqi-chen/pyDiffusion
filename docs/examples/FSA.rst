@@ -2,12 +2,12 @@
 Forward Simulation Analysis (FSA)
 =================================
 
-After **data smoothing** and initial **DC modeling**, we can perform **Forward Simulation Analysis (FSA)** to calculate accurate diffusion coefficients from diffusion profile.
+After **data smoothing** (example_) and initial **DC modeling** (example__) , we can perform **Forward Simulation Analysis (FSA)** to calculate accurate diffusion coefficients from diffusion profile.
 
 .. code-block:: python
 
     import matplotlib.pyplot as plt
-    from pydiffusion.io import read_csv
+    from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot, DCplot, SFplot
     from pydiffusion.fsa import FSA
 
@@ -65,35 +65,41 @@ In this example, automatic **Phase Mode** will be used.
 
 .. code-block:: python
 
-    NiMo_sim, diffsys_fsa = FSA(NiMo_exp, NiMo_sm, diffsys_init, time, Xlim=[0, 1], n=[300, 350])
+    NiMo_sim, diffsys_fsa = FSA(NiMo_exp, NiMo_sm, diffsys_init, time, Xlim=[0, 1], n=[250, 300])
 
 Outputs:
 
 .. code-block::
 
-    Meshing Num=326, Minimum grid=0.450483 um
-    Default error = 0.000990
-    Input the stop criteria of error: [0.001980]
-    0.0016
-    Use Phase mode? [n]
+    Meshing Num=279, Minimum grid=0.525563 um
+
+    Default error = 0.000995
+    Input the stop criteria of error: [0.001991]
+    .0016
+
+    Use Phase Mode? [n]
     (The shape of diffusivity curve does not change)
     y
+    653.080/1000.000 hrs simulated
     Simulation Complete
-    Simulation 1, error = 0.002293(0.001600)
+    Simulation 1, error = 0.002112(0.001600)
     Simulation Complete
-    Simulation 2, error = 0.002408(0.001600)
+    Simulation 2, error = 0.002396(0.001600)
     Simulation Complete
-    Simulation 3, error = 0.001982(0.001600)
+    Simulation 3, error = 0.001930(0.001600)
     Simulation Complete
-    Simulation 4, error = 0.001703(0.001600)
+    Simulation 4, error = 0.001585(0.001600)
+
+    Satisfied with FSA? [n]
+
+    Use Point Mode (y) or Phase Mode (n)? [y]n
+
+    Phase Mode
+    Manually input for each phase? [n]
+    925.701/1000.000 hrs simulated
     Simulation Complete
-    Simulation 5, error = 0.001590(0.001600)
-    Satisfied with FSA? [n]n
-    Use Point mode? [y]n
-    Phase mode
-    Manually input for each phase? [n]n
-    Simulation Complete
-    Simulation 6, error = 0.001558(0.001600)
+    Simulation 5, error = 0.001418(0.001600)
+
     Satisfied with FSA? [n]y
 
 FSA results
@@ -112,4 +118,16 @@ FSA results
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA_files/FSA_2.png
 
+Save FSA results
+----------------
+
+Usually FSA results are saved by combining DC data with simulated profile data.
+
+.. code-block:: python
+
+    save_csv('NiMo.csv', NiMo_sim, diffsys_fsa)
+
 Congratulations! Now you can perform forward simulation analysis based on raw diffusion data!
+
+.. _example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth.rst
+.. __: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DCModeling.rst
