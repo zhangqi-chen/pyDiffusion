@@ -3,7 +3,7 @@ pyDiffusion combines tools like diffusion simulation, diffusion data smooth,
 forward simulation analysis (FSA), etc. to help people analyze diffusion data
 efficiently.
 """
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 from pydiffusion.core import DiffProfile, DiffSystem
 from pydiffusion.simulation import mphSim
