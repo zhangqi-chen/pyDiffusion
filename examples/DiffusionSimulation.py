@@ -5,7 +5,7 @@ from pydiffusion.core import DiffSystem
 from pydiffusion.utils import step, mesh
 from pydiffusion.simulation import mphSim
 from pydiffusion.plot import profileplot, DCplot
-from pydiffusion.io import read_csv
+from pydiffusion.io import read_csv, save_csv
 
 # Create diffusion system with constant DC
 diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14])
@@ -58,3 +58,6 @@ DCplot(diffsys_NiMo, ax1)
 profileplot(profile_NiMo_init, ax2, ls='--')
 profileplot(profile_NiMo, ax2, c='r')
 plt.show()
+
+# Save results
+save_csv('NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)
