@@ -6,7 +6,7 @@ and diffusion coefficients data using matplotlib.
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev
-from pydiffusion.Dmodel import SF
+from pydiffusion.Dtools import SF
 
 
 def profileplot(profile, ax=None, err=None, **kwargs):

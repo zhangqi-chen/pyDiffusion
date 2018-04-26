@@ -11,7 +11,7 @@ Before **Forward Simulation Analysis (FSA)**, an initial modeling of diffusion c
     import matplotlib.pyplot as plt
     from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot, DCplot, SFplot
-    from pydiffusion.Dmodel import Dmodel
+    from pydiffusion.Dtools import Dmodel
 
 Read smoothed profile data
 --------------------------

@@ -4,7 +4,7 @@ The fsa module provides tools to perform Forward Simulation Analysis (FSA).
 import matplotlib.pyplot as plt
 from pydiffusion.core import DiffSystem
 from pydiffusion.utils import error_profile, step, matanocalc, automesh
-from pydiffusion.Dmodel import Dadjust
+from pydiffusion.Dtools import Dadjust
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.simulation import mphSim
 from pydiffusion.io import ita_start, ita_finish, ask_input
@@ -27,7 +27,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
     time : float
         Diffusion time in seconds
     Xlim : list (float), optional
-        Passed to 'pydiffusion.Dmodel.SF', 'pydiffusion.utils.step'.
+        Passed to 'pydiffusion.Dtools.SF', 'pydiffusion.utils.step'.
         Indicates the left and right concentration limits for calculation.
         Default value = [profile.X[0], profile.X[-1]].
     n : list

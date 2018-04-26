@@ -1,13 +1,16 @@
 """
-The Dmodel module provides tools to fit a smooth diffusion coefficient curve
-based on Sauer-Fraise calculation results and the tools to adjust it.
+The Dtools module provides tools to calculate diffusion coefficients based on
+a diffusion profile, like Sauer-Fraise method and Hall method. This module also
+provides the construction of DiffSystem by fitting a smooth diffusion coefficient
+curve based on Sauer-Fraise calculation results and the tools to adjust it.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev, UnivariateSpline
+from scipy.special import erfinv
 from pydiffusion.core import DiffSystem
-from pydiffusion.utils import disfunc
+from pydiffusion.utils import disfunc, matanocalc
 from pydiffusion.io import ita_start, ita_finish, ask_input
 
 
@@ -44,6 +47,80 @@ def SF(profile, time, Xlim=[]):
     DC = intvalue/dYds/2/time*1e-12
     DC = np.append(DC[0], np.append(DC, DC[-1]))
     return DC
+
+
+def Hall(profile, time, Xlim=[], a=0.25):
+    """
+    Use Hall method to estimate diffusion coefficients nearby concentration limits.
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Diffusion profile.
+    time : float
+        Diffusion time in seconds.
+    Xlim : list (float), optional
+        Indicates the left and right concentration limits for calculation.
+        Default value = [profile.X[0], profile.X[-1]].
+    a : float, optional
+        Potion of solubility range will be plotted to choose the linear fitting range
+        of u vs. lambda. default a =0.25, 0 < a < 1.
+        e.g. XL = 0, XR = 1, a = 0.25. [0, 0.25] and [0.75, 1] are the plotting range.
+
+    Returns
+    -------
+    DC_left, DC_right : numpy.array
+        Diffusion coefficients by Hall method at left end and right end.
+        Note: Only left part of DC_left and right part of DC_right are valid.
+    """
+    dis, X = profile.dis, profile.X
+    [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
+
+    # Select range for plot
+    X1, X2 = XL*(1-a)+XR*a, XL*a+XR*(1-a)
+    id1, id2 = (np.abs(X-X1)).argmin(), (np.abs(X-X2)).argmin()
+
+    # Calculate lambda & u
+    Y = (X-XL)/(XR-XL)
+    matano = matanocalc(profile, Xlim)
+    lbd = (dis-matano)/np.sqrt(time)/1e6
+    u = erfinv(2*Y-1)
+
+    plt.figure('Hall')
+    plt.cla()
+    plt.title('LEFT side, select 2 points for linear fitting.')
+    plt.plot(lbd[:id1], u[:id1], 'b.')
+    plt.xlabel('$\mathsf{\lambda}$')
+    plt.ylabel('u')
+    plt.pause(0.01)
+    lbd1 = np.array(plt.ginput(2))[:, 0]
+
+    plt.cla()
+    plt.title('RIGHT side, select 2 points for linear fitting.')
+    plt.plot(lbd[id2:], u[id2:], 'b.')
+    plt.xlabel('$\mathsf{\lambda}$')
+    plt.ylabel('u')
+    plt.pause(0.01)
+    lbd2 = np.array(plt.ginput(2))[:, 0]
+
+    sp = np.where((lbd < max(lbd1)) & (lbd > min(lbd1)))[0]
+    h1, k1 = np.polyfit(lbd[sp], u[sp], 1)
+    sp = np.where((lbd < max(lbd2)) & (lbd > min(lbd2)))[0]
+    h2, k2 = np.polyfit(lbd[sp], u[sp], 1)
+
+    DC_left = 1/4/h1**2*(1+2*k1/np.sqrt(np.pi)*np.exp(u**2)*Y)
+    DC_right = 1/4/h2**2*(1-2*k2/np.sqrt(np.pi)*np.exp(u**2)*(1-Y))
+    DC = SF(profile, time, Xlim)
+
+    plt.cla()
+    plt.semilogy(X, DC, 'b.')
+    plt.semilogy(X[:id1], DC_left[:id1], 'r--', lw=2)
+    plt.semilogy(X[id2:], DC_right[id2:], 'r--', lw=2)
+    plt.xlabel('Mole fraction', fontsize=15)
+    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
+    plt.xlim(X.min(), X.max())
+
+    return DC_left, DC_right
 
 
 def Dpcalc(X, DC, Xp):
