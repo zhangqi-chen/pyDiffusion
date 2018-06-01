@@ -310,7 +310,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
     return Dfunc_spl(Xp, Dp)
 
 
-def Dmodel(profile, time, Xspl=None, Xlim=[]):
+def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
     """
     Given the diffusion profile and diffusion time, modeling the diffusion
     coefficients for each phase.
@@ -322,9 +322,13 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
         identify phase boundaries.
     time : float
         Diffusion time
+    Xspl : list, optional
+        If Xspl is given, Dmodel will be done automatically.
     Xlim : list, optional
         Left and Right limit of diffusion coefficients. Xlim is also passed to
         SF function to calculate diffusion coefficients initially.
+    output : bool, optional
+        Plot Dmodel result or not. Can be False only if Xspl is given.
     """
     if not isinstance(Xlim, list):
         raise TypeError('Xlim must be a list')
@@ -346,10 +350,12 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
     ita_start()
 
     # Choose Spline or UnivariateSpline
-    plt.figure()
-    plt.semilogy(X, DC, 'b.')
-    plt.xlabel('Mole fraction')
-    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+    if Xspl is None or output:
+        plt.figure()
+        plt.semilogy(X, DC, 'b.')
+        plt.xlabel('Mole fraction')
+        plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+
     ipt = ask_input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
     choice = False if 'N' in ipt or 'n' in ipt else True
 
@@ -373,16 +379,17 @@ def Dmodel(profile, time, Xspl=None, Xlim=[]):
         print('DC modeling finished, Xspl info:')
         print(Xspl)
 
-        plt.cla()
-        plt.title('DC Modeling Result')
-        plt.semilogy(X, DC, 'b.')
-        for i in range(Np):
-            Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-            plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
-        plt.xlabel('Mole fraction')
-        plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
-        plt.pause(1.0)
-        plt.show()
+        if output:
+            plt.cla()
+            plt.title('DC Modeling Result')
+            plt.semilogy(X, DC, 'b.')
+            for i in range(Np):
+                Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+            plt.xlabel('Mole fraction')
+            plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+            plt.pause(1.0)
+            plt.show()
 
         ita_finish()
 

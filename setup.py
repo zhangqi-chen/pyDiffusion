@@ -44,6 +44,7 @@ Via pip (recommend):
 setup(
     name='pydiffusion',
     version=version,
+    keywords=['diffusion', 'simulation', 'python'],
     packages=['pydiffusion'],
     include_package_data=True,
     python_requires='>=3.5',
