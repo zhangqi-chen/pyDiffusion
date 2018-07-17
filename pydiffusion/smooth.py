@@ -42,6 +42,10 @@ def phasesmooth(dis, X, ax):
     dis, X : numpy.array
         Diffusion profile within a single phase
     """
+    mr_msg = 'Constant: Enter the constant composition (1 input)\n'\
+             'Linear: Enter the start and end composition (2 inputs)\n'\
+             'Moving Radius: Start & end composition, smooth radius and times (4 inputs)\n'
+
     Xsm = X.copy()
     smoo = True
     while smoo:
@@ -60,20 +64,32 @@ def phasesmooth(dis, X, ax):
             ax.plot(dis[zmid], Xsm[zmid], 'bo')
             plt.draw()
             Xsmn = np.copy(Xsm[zmid])
-            msg = 'Enter Start and End Composition for this region: ['
-            msg += str(Xsmn[0])+' '+str(Xsmn[-1])+']\n'
-            ipt = ask_input(msg)
-            if ipt != '':
-                Xsmn[0], Xsmn[-1] = [float(i) for i in ipt.split(' ')]
-            msg = 'Smooth Radius and Times: [1 1]\n'
-            ipt = ask_input(msg)
-            if ipt != '':
-                ipt = ipt.split(' ')
-                r, t = float(ipt[0]), int(ipt[1])
+            msg = mr_msg+'E.g. ['+str(Xsmn[0])+' '+str(Xsmn[-1])+' 1 1]\n'
+            while True:
+                ipt = ask_input(msg)
+                if len(ipt.split()) in (0, 1, 2, 4):
+                    break
+                else:
+                    print('Wrong inputs!')
+            # Constant
+            if len(ipt.split()) == 1:
+                Xsmn[:] = float(ipt)
+            # Linear
+            elif len(ipt.split()) == 2:
+                dis_linear = [dis[zmid][0], dis[zmid][-1]]
+                X_linear = [float(i) for i in ipt.split()]
+                f_linear = splrep(dis_linear, X_linear, k=1)
+                Xsmn = splev(dis[zmid], f_linear)
+            # Moving radius
             else:
-                r, t = 1.0, 1
-            for i in range(t):
-                Xsmn = movingradius(dis[zmid], Xsmn, r)
+                if len(ipt.split()) == 0:
+                    r, t = 1.0, 1
+                else:
+                    ipt = ipt.split()
+                    Xsmn[0], Xsmn[-1] = float(ipt[0]), float(ipt[1])
+                    r, t = float(ipt[2]), float(ipt[3])
+                for i in range(t):
+                    Xsmn = movingradius(dis[zmid], Xsmn, r)
             ax.cla()
             ax.plot(dis[zmid], Xsm[zmid], 'bo', dis[zmid], Xsmn, 'ro')
             plt.draw()
