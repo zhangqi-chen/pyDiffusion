@@ -27,17 +27,28 @@ class DiffProfile(object):
             self.X = np.array(X, dtype=float)
         except TypeError:
             print('Can not convert input into 1d-array')
+
         if self.dis.ndim != 1 or self.X.ndim != 1:
             raise ValueError('1d data is required')
+
         if len(self.dis) != len(self.X):
             raise ValueError('length of dis and X is not equal')
+
+        # dis must be ascending
+        if not np.all(dis[1:] >= dis[:-1]):
+            self.X = [x for _, x in sorted(zip(self.dis, self.X))]
+            self.dis.sort()
+
         d1, d2 = 0.5*(self.dis[1]-self.dis[0]), 0.5*(self.dis[-1]-self.dis[-2])
+
         try:
             If = np.array(If, dtype=float)
         except TypeError:
             print('If must be a list or 1d array')
+
         if If.ndim != 1:
             raise TypeError('If must be a list or 1d array')
+
         self.If = np.array([self.dis[0]-d1] + list(If) + [self.dis[-1]+d2])
         self.Ip = np.zeros(len(self.If), dtype=int)
         for i in range(1, len(self.Ip)-1):

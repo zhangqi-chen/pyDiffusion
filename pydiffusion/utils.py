@@ -153,15 +153,18 @@ def profilefunc(profile):
 
 
 def disfunc(dis, X):
-    "Create a interpolation (k=1) of the dis vs. X profile"
-    if list(X).count(X[0]) > 1 and list(X).count(X[-1]) > 1:
-        pid = np.where((X > X[0]) & (X < X[-1]))[0]
-    elif list(X).count(X[0]) > 1:
-        pid = np.where((X > X[0]))[0]
-    elif list(X).count(X[-1]) > 1:
-        pid = np.where((X < X[-1]))[0]
+    "Create a tck interpolation (k=1) of the dis vs. X profile"
+    Xmin, Xmax = (X[0], X[-1]) if X[0] < X[-1] else (X[-1], X[0])
+    if list(X).count(Xmin) > 1 and list(X).count(Xmax) > 1:
+        pid = np.where((X > Xmin) & (X < Xmax))[0]
+    elif list(X).count(Xmin) > 1:
+        pid = np.where((X > Xmin))[0]
+    elif list(X).count(Xmax) > 1:
+        pid = np.where((X < Xmax))[0]
     else:
         pid = np.arange(len(X))
+    if X[-1] < X[0]:
+        pid = pid[::-1]
     return splrep(X[pid], dis[pid], k=1)
 
 

@@ -54,8 +54,13 @@ def phasesmooth(dis, X, ax):
         plt.draw()
 
         # Zoom in or not
-        ipt = ask_input('Enter the zoomed in start and end location, if no, enter nothing\n')
-        zm = [float(i) for i in ipt.split(' ')] if ipt != '' else [dis[0], dis[-1]]
+        ipt = ask_input('Zoom in? [n]\n')
+        if 'y' in ipt or 'Y' in ipt:
+            ax.set_title('Select 2 points to zoom in')
+            plt.pause(1.0)
+            zm = np.array(plt.ginput(2))[:, 0]
+        else:
+            zm = [dis[0], dis[-1]]
         zmid = np.where((dis >= zm[0]) & (dis <= zm[1]))[0]
 
         sm = True
@@ -87,7 +92,7 @@ def phasesmooth(dis, X, ax):
                 else:
                     ipt = ipt.split()
                     Xsmn[0], Xsmn[-1] = float(ipt[0]), float(ipt[1])
-                    r, t = float(ipt[2]), float(ipt[3])
+                    r, t = float(ipt[2]), int(ipt[3])
                 for i in range(t):
                     Xsmn = movingradius(dis[zmid], Xsmn, r)
             ax.cla()
@@ -141,18 +146,27 @@ def datasmooth(profile, interface=[], n=2000):
     Ip = [0]*(Np+1)
     disn, Xn = dis.copy(), X.copy()
 
-    # Two distance value is the same
+    # Same distance values
     for i in range(len(disn)-1):
-        if disn[i] == disn[i+1]:
-            disn[i+1] += 1e-5
+        for j in range(i+1, len(disn)):
+            if disn[i] == disn[j]:
+                disn[j] += 1e-5*(j-i)
+            elif disn[j] > disn[i]:
+                break
 
     ita_start()
 
     # Apply phasesmooth to each phase
     for i in range(Np):
         pid = np.where((disn > If[i]) & (disn < If[i+1]))[0]
-        Xn[pid] = phasesmooth(disn[pid], Xn[pid], ax)
+        try:
+            Xn[pid] = phasesmooth(disn[pid], Xn[pid], ax)
+        except (ValueError, TypeError) as error:
+            ita_finish()
+            raise error
     plt.close()
+
+    ita_finish()
 
     # Create a sharp interface at interface locations
     # Solubility of each phase will be extended a little
@@ -177,8 +191,6 @@ def datasmooth(profile, interface=[], n=2000):
             disni[ni[i]:ni[i+1]] = np.linspace(disn[Ip[i]], disn[Ip[i+1]-1], ni[i+1]-ni[i])
             Xni[ni[i]:ni[i+1]] = splev(disni[ni[i]:ni[i+1]], fX)
 
-    ita_finish()
-
-    print('Data smoothing finished')
+    print('Smooth finished')
 
     return DiffProfile(disni, Xni, If[1:-1])

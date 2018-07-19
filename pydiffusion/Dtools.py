@@ -344,6 +344,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
         if dis[i] == dis[i+1]:
             Xr = np.insert(Xr, -1, [X[i], X[i+1]])
     Np = len(Xr)//2
+    Xr.sort()
     Xr = Xr.reshape(Np, 2)
     fD = [0]*Np
 
@@ -369,12 +370,20 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
 
             # Spline
             if choice:
-                Dp = Dpcalc(X, DC, Xspl[i])
-                fD[i] = Dfunc_spl(Xspl[i], Dp)
+                try:
+                    Dp = Dpcalc(X, DC, Xspl[i])
+                    fD[i] = Dfunc_spl(Xspl[i], Dp)
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
 
             # UnivariateSpline
             else:
-                fD[i] = Dfunc_uspl(X, DC, Xspl[i], Xr[i])
+                try:
+                    fD[i] = Dfunc_uspl(X, DC, Xspl[i], Xr[i])
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
 
         print('DC modeling finished, Xspl info:')
         print(Xspl)
@@ -403,6 +412,11 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
         # Spline
         if choice:
             while True:
+                DC_real = [k for k in DC[pid] if not np.isnan(k) and not np.isinf(k)]
+                DCmean = np.mean(DC_real)
+                for k in pid:
+                    if np.isnan(DC[k]) or np.isinf(DC[k]) or abs(np.log10(DC[k]/DCmean)) > 5:
+                        DC[k] = DCmean
                 plt.cla()
                 plt.semilogy(X[pid], DC[pid], 'b.')
                 plt.xlabel('Mole fraction')
@@ -413,8 +427,12 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
                 plt.title('Select %i points of Spline' % int(ipt))
                 plt.pause(1.0)
                 Xp = np.array(plt.ginput(int(ipt)))[:, 0]
-                Dp = Dpcalc(X, DC, Xp)
-                fD[i] = Dfunc_spl(Xp, Dp)
+                try:
+                    Dp = Dpcalc(X, DC, Xp)
+                    fD[i] = Dfunc_spl(Xp, Dp)
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
                 Xspl[i] = list(Xp)
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
                 plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
@@ -434,7 +452,11 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
                 plt.draw()
                 ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
                 Xp = np.array([float(x) for x in ipt.split(' ')])
-                fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
+                try:
+                    fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
                 plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
@@ -442,6 +464,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
                 redo = False if 'N' in ipt or 'n' in ipt else True
                 if redo:
                     break
+
+    ita_finish()
 
     print('DC modeling finished, Xspl info:')
     print(Xspl)
@@ -456,7 +480,5 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
     plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
     plt.pause(1.0)
     plt.show()
-
-    ita_finish()
 
     return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl)

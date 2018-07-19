@@ -30,6 +30,7 @@ def plot_lim(x1, x2, log=False):
     x1_lim, x2_lim : float
         Plot range output, used for plt.xlim or plt.set_ylim.
     """
+    x1, x2 = min(x1, x2), max(x1, x2)
     if not log:
         x1_lim = (x1*100//1)/100
         x2_lim = (x2*100//1+1)/100

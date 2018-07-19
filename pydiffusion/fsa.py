@@ -47,7 +47,10 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
     # Create step profile on meshed grids
     dism = automesh(profile_sm, diffsys, n)
     matano = matanocalc(profile_sm, Xlim)
-    profile_init = step(dism, matano, diffsys, Xlim)
+    if Xlim == [] and profile_sm.X[-1] < profile_sm.X[0]:
+        profile_init = step(dism, matano, diffsys, [diffsys.Xr[-1, 1], diffsys.Xr[0, 0]])
+    else:
+        profile_init = step(dism, matano, diffsys, Xlim)
 
     # Determine the stop criteria of forward simulations
     error_sm = error_profile(profile_sm, profile_exp)
@@ -94,6 +97,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
         SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
         DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
         plt.draw()
+        plt.tight_layout()
 
         # DC adjust
         Dfunc_adjust = [0] * diffsys_sim.Np
@@ -101,7 +105,11 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
         # If error > stop criteria, continue simulation by auto DC adjustment
         if error_sim > error_stop:
             for ph in range(diffsys_sim.Np):
-                Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp)
+                try:
+                    Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp)
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
             diffsys_sim.Dfunc = Dfunc_adjust
 
         # If error < stop criteria or simulate too many times
@@ -121,7 +129,11 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
                 pp = False if 'n' in ipt or 'N' in ipt else True
                 if pp:
                     for ph in range(diffsys_sim.Np):
-                        Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp)
+                        try:
+                            Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp)
+                        except (ValueError, TypeError) as error:
+                            ita_finish()
+                            raise error
                     diffsys_sim.Dfunc = Dfunc_adjust
 
                     DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
@@ -136,11 +148,15 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
             manual = True if 'y' in ipt or 'Y' in ipt else False
             for ph in range(diffsys_sim.Np):
                 if manual:
-                    ipt = input('Input deltaD for phase # %i:\nDC = DC * 10^deltaD, default deltaD = auto' % (ph+1))
+                    ipt = input('Input deltaD for phase # %i:\n(DC = DC * 10^deltaD, default deltaD = auto)\n' % (ph+1))
                     deltaD = float(ipt) if ipt != '' else None
                 else:
                     deltaD = None
-                Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp, deltaD)
+                try:
+                    Dfunc_adjust[ph] = Dadjust(profile_sm, profile_sim, diffsys_sim, ph, pp, deltaD)
+                except (ValueError, TypeError) as error:
+                    ita_finish()
+                    raise error
 
             # Apply the adjustment to diffsys_sim
             diffsys_sim.Dfunc = Dfunc_adjust
