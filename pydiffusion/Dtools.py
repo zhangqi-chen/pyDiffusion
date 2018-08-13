@@ -43,9 +43,10 @@ def SF(profile, time, Xlim=[]):
     Y1 = (X-XL)/(XR-XL)
     Y2 = 1-Y1
     dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
-    intvalue = np.array([Y2[i]*np.trapz(Y1[:i], dis[:i])+Y1[i]*(np.trapz(Y2[i:], dis[i:])) for i in range(1, len(dis)-1)])
+    dYds = np.append(dYds[0], np.append(dYds, dYds[-1]))
+    intvalue = np.array([Y2[i]*np.trapz(Y1[:i+1], dis[:i+1])+Y1[i]*(np.trapz(Y2[i:], dis[i:])) for i in range(len(dis))])
     DC = intvalue/dYds/2/time*1e-12
-    DC = np.append(DC[0], np.append(DC, DC[-1]))
+    DC[0], DC[-1] = DC[1], DC[-2]
     return DC
 
 
