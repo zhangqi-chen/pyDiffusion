@@ -241,7 +241,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
 
 
 def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
-                  accuracy=1e-3, output=False):
+                  r=0.3, efunc=None, accuracy=1e-3, output=False):
     """
     Error analysis of diffusion coefficients through comparison with experimental
     data.
@@ -264,9 +264,15 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
         loc indicates the locations to perform error analysis. If loc is an
         integer, loc points are selected inside each phase. Each point has
         both positive and negative error to be calculated.
-    w : list
+    w : list, optional
         Weights of each phase to calculate error.
         Passed to 'pydiffusion.utils.error_profile'.
+    r : float, optional
+        The concentration range of bias.
+        Passed to 'pydiffusion.utils.DCbias'
+    efunc : function, optional
+        Function to create bias.
+        Passed to 'pydiffusion.utils.DCbias'
     accuracy : float
         Stop criterion of each simulation: within error_cap * (1+-accuracy).
         Low accuracy value may increase simulation times for each point.
@@ -312,7 +318,7 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
             De, Xe = [0], [error_ref]
             while True:
                 n_sim += 1
-                diffsys_error = DCbias(diffsys, X, deltaD)
+                diffsys_error = DCbias(diffsys, X, deltaD, r, efunc)
                 profile_error = mphSim(profile_init, diffsys_error, time, output=output)
                 error_sim = error_profile(profile_error, profile_exp, w)
                 if output:
