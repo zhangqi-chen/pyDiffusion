@@ -1,4 +1,24 @@
 """
+    Copyright (c) 2018-2019 Zhangqi Chen
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 The Dtools module provides tools to calculate diffusion coefficients based on
 a diffusion profile, like Sauer-Fraise method and Hall method. This module also
 provides the construction of DiffSystem by fitting a smooth diffusion coefficient
@@ -311,7 +331,7 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
     return Dfunc_spl(Xp, Dp)
 
 
-def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
+def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     """
     Given the diffusion profile and diffusion time, modeling the diffusion
     coefficients for each phase.
@@ -322,7 +342,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
         Diffusion profile. Multiple phase profile must be after datasmooth to
         identify phase boundaries.
     time : float
-        Diffusion time
+        Diffusion time in seconds.
     Xspl : list, optional
         If Xspl is given, Dmodel will be done automatically.
     Xlim : list, optional
@@ -330,6 +350,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
         SF function to calculate diffusion coefficients initially.
     output : bool, optional
         Plot Dmodel result or not. Can be False only if Xspl is given.
+    name : str, optional
+        Name of the output DiffSystem
     """
     if not isinstance(Xlim, list):
         raise TypeError('Xlim must be a list')
@@ -482,4 +504,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True):
     plt.pause(1.0)
     plt.show()
 
-    return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl)
+    if name == '':
+        name = profile.name+'_%.1fh_modeled' % (time/3600)
+
+    return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl, name=name)

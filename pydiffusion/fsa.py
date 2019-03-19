@@ -1,4 +1,24 @@
 """
+    Copyright (c) 2018-2019 Zhangqi Chen
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 The fsa module provides tools to perform Forward Simulation Analysis (FSA).
 """
 import matplotlib.pyplot as plt
@@ -10,7 +30,7 @@ from pydiffusion.simulation import mphSim
 from pydiffusion.io import ita_start, ita_finish, ask_input
 
 
-def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
+def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, name=''):
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
@@ -30,12 +50,14 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
         Passed to 'pydiffusion.Dtools.SF', 'pydiffusion.utils.step'.
         Indicates the left and right concentration limits for calculation.
         Default value = [profile.X[0], profile.X[-1]].
-    n : list
+    n : list. optional
         Passed to 'pydiffusion.utils.automesh'.
         Meshing number range, default = [400, 500].
-    w : list
+    w : list, optional
         Weights of each phase to calculate error.
         Passed to 'pydiffusion.utils.error_profile'.
+    name : str, optional
+        Name of the output DiffProfile and DiffSystem
 
     Returns
     -------
@@ -66,8 +88,11 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
     else:
         pp = False
 
+    if name == '':
+        name = profile_exp.name+'_FSA'
+
     # Diffusion coefficients used for forward simulations
-    diffsys_sim = DiffSystem(diffsys.Xr, diffsys.Dfunc, Xspl=diffsys.Xspl)
+    diffsys_sim = DiffSystem(diffsys.Xr, diffsys.Dfunc, Xspl=diffsys.Xspl, name=name)
 
     # Plot FSA status
     fig = plt.figure('FSA', figsize=(16, 6))
@@ -84,7 +109,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None):
 
         # Simulation
         n_sim += 1
-        profile_sim = mphSim(profile_init, diffsys_sim, time)
+        profile_sim = mphSim(profile_init, diffsys_sim, time, name=name)
         error_sim = error_profile(profile_sim, profile_exp, w)
         print('Simulation %i, error = %f(%f)' % (n_sim, error_sim, error_stop))
 

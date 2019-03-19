@@ -1,4 +1,24 @@
 """
+    Copyright (c) 2018-2019 Zhangqi Chen
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 The plot module provides support for visualization of diffusion profile data
 and diffusion coefficients data using matplotlib.
 """
@@ -12,6 +32,8 @@ from pydiffusion.Dtools import SF
 label_fontsize = 13
 # Default tick font size
 tick_fontsize = 11
+# Default legend font size
+leg_fontsize = 13
 
 
 def plot_lim(x1, x2, log=False):
@@ -51,10 +73,10 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     ax : matplotlib.Axes
         Default axes used if not specified
     kwargs : kwargs
-        Passed to 'matplotlib.pyplot.plot'
+        Passed to 'matplotlib.pyplot.plot', add label to name the profile.
     """
     dis, X = profile.dis, profile.X
-    clw = {'lw': 2}
+    clw = {'lw': 2, 'label': profile.name}
     args = {**clw, **kwargs}
     if ax is None:
         fig = plt.figure()
@@ -76,6 +98,9 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     ax.set_xlim(dis.min(), dis.max())
     ax.set_ylim(plot_lim(X.min(), X.max()))
     ax.tick_params(labelsize=tick_fontsize)
+    leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
+    leg.get_frame().set_linewidth(0.0)
+    leg.draggable()
 
 
 def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
@@ -93,11 +118,13 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     ax : matplotlib.Axes
         Default axes used if not specified
     kwargs : kwargs
-        Passed to 'matplotlib.pyplot.semilogy'
+        Passed to 'matplotlib.pyplot.semilogy', , add label to name the D curve.
     """
     X = profile.X
     sf = SF(profile, time, Xlim)
     clw = {'marker': '.', 'ls': 'none'}
+    if 'label' not in kwargs:
+        clw['label'] = profile.name+'_%.1fh_SF' % (time/3600)
     args = {**clw, **kwargs}
     if ax is None:
         fig = plt.figure()
@@ -107,6 +134,10 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=label_fontsize)
     ax.set_xlim(plot_lim(X.min(), X.max()))
     ax.tick_params(labelsize=tick_fontsize)
+    leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
+    leg.get_frame().set_linewidth(0.0)
+    leg.draggable()
+    plt.tight_layout()
 
 
 def DCplot(diffsys, ax=None, err=None, **kwargs):
@@ -122,26 +153,27 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     err : DiffError
         Error analysis result
     kwargs : kwargs
-        Passed to 'matplotlib.pyplot.semilogy'
+        Passed to 'matplotlib.pyplot.semilogy', add label to name the D curve.
     """
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
     Np, Xr, fD = diffsys.Np, diffsys.Xr, diffsys.Dfunc
-    clw = {'lw': 2}
+    clw = {'lw': 2, 'label': diffsys.name}
     args = {**clw, **kwargs}
-    clw_nl = {'label': '_nolegend_'}
-    args_nl = {**args, **clw_nl}
     # Diffusion Coefficients plot
     for i in range(Np):
         Xp = np.linspace(Xr[i, 0], Xr[i, 1], 51)
         Dp = np.exp(splev(Xp, fD[i]))
         if i == 0:
             Dmin, Dmax = min(Dp), max(Dp)
-            ax.semilogy(Xp, Dp, **args)
+            p = ax.semilogy(Xp, Dp, **args)
+            clw_nl = {'c': p[0].get_color(), 'label': '_nolegend_'}
+            args_nl = {**args, **clw_nl}
         else:
             Dmin, Dmax = min(Dmin, min(Dp)), max(Dmax, max(Dp))
             ax.semilogy(Xp, Dp, **args_nl)
+    plt.tight_layout()
 
     # Error analysis result plot
     if err is not None:
@@ -160,3 +192,7 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     ax.set_xlabel('Mole fraction', fontsize=label_fontsize)
     ax.set_ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=label_fontsize)
     ax.tick_params(labelsize=tick_fontsize)
+    leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
+    leg.get_frame().set_linewidth(0.0)
+    leg.draggable()
+    plt.tight_layout()

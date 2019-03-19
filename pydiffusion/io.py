@@ -1,4 +1,24 @@
 """
+    Copyright (c) 2018-2019 Zhangqi Chen
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 The io module provides support for reading and writing diffusion profile data
 and diffusion coefficients data to csv files.
 """
@@ -61,12 +81,23 @@ def ita_finish():
     done = True
 
 
-def save_csv(name, profile=None, diffsys=None):
+def save_csv(name=None, profile=None, diffsys=None):
     """
-    Save diffusion data as csv.
+    Save diffusion data as csv file.
+
+    Parameters
+    ----------
+    name : str
+        csv file name, default name is the profile name of diffsys name.
+    profile : DiffProfile
+        DiffProfile to save.
+    diffsys : DiffSystem
+        DiffSystem to save. diffsys can be saved by itself or with profile.
     """
     if profile is None and diffsys is None:
         raise ValueError('No data entered')
+    if name is not None and not name.endswith('.csv'):
+        name += str(name)+'.csv'
     elif profile is None:
         Xr, fD = diffsys.Xr, diffsys.Dfunc
         X, DC = np.array([]), np.array([])
@@ -76,9 +107,13 @@ def save_csv(name, profile=None, diffsys=None):
             X = np.append(X, Xnew)
             DC = np.append(DC, Dnew)
         data = pd.DataFrame({'X': X, 'DC': DC})
+        if name is None:
+            name = diffsys.name+'.csv'
         data.to_csv(name, index=False)
     elif diffsys is None:
         data = pd.DataFrame({'dis': profile.dis, 'X': profile.X})
+        if name is None:
+            name = profile.name+'.csv'
         data.to_csv(name, index=False)
     else:
         dis, X, Xr, fD = profile.dis, profile.X, diffsys.Xr, diffsys.Dfunc
@@ -87,17 +122,49 @@ def save_csv(name, profile=None, diffsys=None):
             pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
             DC[pid] = np.exp(splev(X[pid], fD[i]))
         data = pd.DataFrame({'dis': dis, 'X': X, 'DC': DC})
+        if name is None:
+            name = profile.name+'.csv'
         data.to_csv(name, index=False)
 
 
-def read_csv(name, Xlim=None):
+def read_csv(filename, Xlim=None, name=''):
     """
-    Read diffusion data from csv.
+    Read diffusion data from csv file.
+
+    Parameters
+    ----------
+    filename : str
+        csv file path.
+    Xlim : list (length of 2), optional
+        A list to determine the two ends solubilities.
+    name : str, optional
+        Name the output DiffProfile and DiffSystem
+
+    Returns
+    -------
+    profile : DiffProfile
+        output DiffProfile object.
+    diffsys : DiffSystem
+        output DiffSystem object.
     """
-    data = pd.read_csv(name)
+    data = pd.read_csv(filename)
     if 'X' not in data.columns:
         raise ValueError('No column X in csv file')
     X = np.array(data['X'])
+
+    # Auto rename
+    if name == '':
+        if '/' in filename:
+            r = filename.rfind('/')
+        elif '\\' in filename:
+            r = filename.rfind('\\')
+        else:
+            r = -1
+        if filename.endswith('.csv'):
+            name = filename[r+1:-4]
+        else:
+            name = filename[r+1:]
+
     if 'dis' in data.columns:
         dis = np.array(data['dis'])
         If = []
@@ -106,7 +173,7 @@ def read_csv(name, Xlim=None):
             if dis[i] == dis[i+1]:
                 If += [dis[i]]
                 XIf += [X[i], X[i+1]]
-        profile = DiffProfile(dis, X, If)
+        profile = DiffProfile(dis, X, If, name=name)
         if Xlim is None:
             XIf = np.array([X[0]] + XIf + [X[-1]])
         else:
@@ -117,5 +184,5 @@ def read_csv(name, Xlim=None):
     else:
         X = DC = None
     if Xr is not None:
-        diffsys = DiffSystem(Xr, X=X, DC=DC)
+        diffsys = DiffSystem(Xr, X=X, DC=DC, name=name)
     return profile, diffsys

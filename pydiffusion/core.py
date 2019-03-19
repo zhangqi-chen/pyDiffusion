@@ -1,9 +1,30 @@
 """
+    Copyright (c) 2018-2019 Zhangqi Chen
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
 The core module gives definition of main classes in pyDiffusion.
 """
 
 import numpy as np
 from scipy.interpolate import splrep
+from pydiffusion import get_profile_num, get_system_num
 
 
 class DiffProfile(object):
@@ -19,14 +40,21 @@ class DiffProfile(object):
     If : list, optional
         N-1 interfaces locations (in micron) for N phases system.
         Default value is [dis[0]-d1, dis[-1]+d2], d1 d2 are small values.
+    name : str, optional
+        Name of the current diffusion profile.
     """
 
-    def __init__(self, dis, X, If=[]):
+    def __init__(self, dis, X, If=[], name=get_profile_num()):
         try:
             self.dis = np.array(dis, dtype=float)
             self.X = np.array(X, dtype=float)
         except TypeError:
             print('Can not convert input into 1d-array')
+
+        try:
+            self.name = str(name)
+        except TypeError:
+            print('name must be able to convert to str type')
 
         if self.dis.ndim != 1 or self.X.ndim != 1:
             raise ValueError('1d data is required')
@@ -35,7 +63,7 @@ class DiffProfile(object):
             raise ValueError('length of dis and X is not equal')
 
         # dis must be ascending
-        if not np.all(dis[1:] >= dis[:-1]):
+        if not np.all(self.dis[1:] >= self.dis[:-1]):
             self.X = [x for _, x in sorted(zip(self.dis, self.X))]
             self.dis.sort()
 
@@ -72,9 +100,11 @@ class DiffSystem(object):
     Xspl : list of array, optional
         Xspl is the reference locations to create Dfunc, useful for forward
         simulation analysis.
+    name : str, optional
+        Name of the current diffusion system.
     """
 
-    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None):
+    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None, name=get_system_num()):
         if isinstance(Xr, list):
             if len(Xr) != 2:
                 raise ValueError('If Xr is a list, it must has length of 2')
@@ -90,6 +120,12 @@ class DiffSystem(object):
                 raise ValueError('Xr must an array of shape ( ,2)')
             else:
                 self.Np = Xr.shape[0]
+
+        try:
+            self.name = str(name)
+        except TypeError:
+            print('name must be able to convert to str type')
+
         if Dfunc is not None:
             if len(Dfunc) != self.Np:
                 raise ValueError('Length of Dfunc must be equal to phase number Np')
