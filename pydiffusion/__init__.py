@@ -25,6 +25,7 @@ efficiently.
 """
 __version__ = '0.1.6'
 
+
 from pydiffusion.core import DiffProfile, DiffSystem
 from pydiffusion.simulation import mphSim
 from pydiffusion.smooth import datasmooth
@@ -33,18 +34,3 @@ from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.utils import matanocalc, mesh, step
 from pydiffusion.Dtools import SF, Hall, Dmodel
 from pydiffusion.io import read_csv, save_csv
-
-system_num = 1
-profile_num = 1
-
-
-def get_system_num():
-    global system_num
-    system_num += 1
-    return 'System '+str(system_num)
-
-
-def get_profile_num():
-    global profile_num
-    profile_num += 1
-    return 'Profile '+str(profile_num)

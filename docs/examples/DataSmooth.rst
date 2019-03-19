@@ -4,7 +4,7 @@ Data Smoothing
 
 Before any diffusion coefficients calculation, the data smoothing is required for original experimental datasets. A good data smoothing will give a good guess of diffusion coefficients before **Forward Simulation Analysis (FSA)**.
 
-Data smoothing can be implemented by ``pydiffusion.smooth.datasmooth``. (Currently doen't support ``matplotlib inline``) The process requires many mannual inputs as smoothing goes on. Here is an example for data smoothing of Ni-Mo 1100C 1000 hours diffusion data.
+Data smoothing can be implemented by ``pydiffusion.smooth.datasmooth``. (Currently doen't support ``matplotlib inline``) The process requires many mannual inputs as smoothing goes on, so please do not close any window during the process. Here is an example for data smoothing of Ni-Mo 1100C 1000 hours diffusion data.
 
 .. code-block:: python
 

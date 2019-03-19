@@ -4,7 +4,7 @@ Diffusion Coefficients (DC) Modeling
 
 Before **Forward Simulation Analysis (FSA)**, an initial modeling of diffusion coefficients is required. It is recommend to perform **Data Smoothing** (example_) before **DC modeling**.
 
-**DC modeling** can be implemented by ``pydiffusion.Dmodel.Dmodel``. Same with data smoothing, it requires many manually inputs during the process. (Currently doen't support ``matplotlib inline``) Here is an example for DC modeling of smoothed Ni-Mo 1100C 1000 hours data.
+**DC modeling** can be implemented by ``pydiffusion.Dmodel.Dmodel``. Same with data smoothing, it requires many manually inputs during the interactive process, please do not close any plot window during the modeling process. (Currently doen't support ``matplotlib inline``) Here is an example for DC modeling of smoothed Ni-Mo 1100C 1000 hours data.
 
 .. code-block:: python
 

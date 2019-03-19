@@ -334,7 +334,8 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
 def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     """
     Given the diffusion profile and diffusion time, modeling the diffusion
-    coefficients for each phase.
+    coefficients for each phase. Please do not close any plot window during
+    the modeling process.
 
     Parameters
     ----------

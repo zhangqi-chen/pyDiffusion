@@ -24,7 +24,6 @@ The core module gives definition of main classes in pyDiffusion.
 
 import numpy as np
 from scipy.interpolate import splrep
-from pydiffusion import get_profile_num, get_system_num
 
 
 class DiffProfile(object):
@@ -44,7 +43,7 @@ class DiffProfile(object):
         Name of the current diffusion profile.
     """
 
-    def __init__(self, dis, X, If=[], name=get_profile_num()):
+    def __init__(self, dis, X, If=[], name='Profile'):
         try:
             self.dis = np.array(dis, dtype=float)
             self.X = np.array(X, dtype=float)
@@ -104,7 +103,7 @@ class DiffSystem(object):
         Name of the current diffusion system.
     """
 
-    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None, name=get_system_num()):
+    def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None, name='System'):
         if isinstance(Xr, list):
             if len(Xr) != 2:
                 raise ValueError('If Xr is a list, it must has length of 2')

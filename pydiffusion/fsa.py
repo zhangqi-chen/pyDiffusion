@@ -34,6 +34,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
+    Please do not close any plot window during the FSA process.
 
     Parameters
     ----------
