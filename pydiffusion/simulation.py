@@ -29,7 +29,7 @@ from pydiffusion.core import DiffProfile, DiffError
 from pydiffusion.utils import error_profile, DCbias, profilefunc
 
 
-def sphSim(profile, diffsys, time, output=True):
+def sphSim(profile, diffsys, time, output=True, name=''):
     """
     Single-Phase Diffusion Simulation
 
@@ -49,6 +49,9 @@ def sphSim(profile, diffsys, time, output=True):
     profile : DiffProfile
         Simulated diffusion profile
     """
+    if name == '':
+        name = profile.name+'_%.1fh' % (time/3600)
+
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
     fD = diffsys.Dfunc
     d = dis[1:]-dis[:-1]
@@ -69,10 +72,10 @@ def sphSim(profile, diffsys, time, output=True):
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
     if output:
         print('Simulation Complete')
-    return DiffProfile(dis*1e6, Xs)
+    return DiffProfile(dis*1e6, Xs, name=name)
 
 
-def mphSim(profile, diffsys, time, liquid=0, output=True):
+def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     """
     Single/Multiple-Phase Diffusion Simulation. Liquid phase can be attached
     at left or right end. For thin film simulation, please set up the
@@ -104,6 +107,9 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
     Ip, If = profile.Ip.copy(), profile.If.copy()/1e6
     Np, Xr = diffsys.Np, diffsys.Xr.copy()
     fD = [f for f in diffsys.Dfunc]
+
+    if name == '':
+        name = profile.name+'_%.1fh' % (time/3600)
 
     if len(If) != Np+1:
         raise ValueError('Number of phases mismatches between profile and diffusion system')
@@ -257,7 +263,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True):
         dis = np.insert(dis, Ip[i], [If[i], If[i]])
         Xs = np.insert(Xs, Ip[i], [Xr[i-1, 1], Xr[i, 0]])
 
-    return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6)
+    return DiffProfile(dis*1e6, Xs, If[1:-1]*1e6, name=name)
 
 
 def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,

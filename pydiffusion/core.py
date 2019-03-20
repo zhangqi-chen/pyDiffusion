@@ -104,21 +104,17 @@ class DiffSystem(object):
     """
 
     def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None, name='System'):
-        if isinstance(Xr, list):
-            if len(Xr) != 2:
-                raise ValueError('If Xr is a list, it must has length of 2')
-            else:
-                self.Np = 1
-                self.Xr = np.array([Xr])
+        try:
+            self.Xr = np.array(Xr, dtype=float)
+        except TypeError:
+            print('Cannot convert Xr to array')
+        if self.Xr.shape == (2,):
+            self.Xr = np.array([Xr])
+            self.Np = 1
+        elif self.Xr.shape[1] == 2:
+            self.Np = self.Xr.shape[0]
         else:
-            try:
-                self.Xr = np.array(Xr, dtype=float)
-            except TypeError:
-                print('Cannot convert Xr to array')
-            if Xr.shape[1] != 2:
-                raise ValueError('Xr must an array of shape ( ,2)')
-            else:
-                self.Np = Xr.shape[0]
+            raise ValueError('Xr must has a shape (,2) or (2,)')
 
         try:
             self.name = str(name)
