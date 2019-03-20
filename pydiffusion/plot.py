@@ -74,6 +74,10 @@ def profileplot(profile, ax=None, err=None, **kwargs):
         Default axes used if not specified
     kwargs : kwargs
         Passed to 'matplotlib.pyplot.plot', add label to name the profile.
+
+    Returns
+    -------
+    matplotlib AxesSubplot
     """
     dis, X = profile.dis, profile.X
     clw = {'lw': 2, 'label': profile.name}
@@ -101,6 +105,9 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
     leg.get_frame().set_linewidth(0.0)
     leg.draggable()
+    plt.tight_layout()
+
+    return ax
 
 
 def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
@@ -119,6 +126,10 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
         Default axes used if not specified
     kwargs : kwargs
         Passed to 'matplotlib.pyplot.semilogy', , add label to name the D curve.
+
+    Returns
+    -------
+    matplotlib AxesSubplot
     """
     X = profile.X
     sf = SF(profile, time, Xlim)
@@ -139,6 +150,8 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     leg.draggable()
     plt.tight_layout()
 
+    return ax
+
 
 def DCplot(diffsys, ax=None, err=None, **kwargs):
     """
@@ -154,6 +167,10 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
         Error analysis result
     kwargs : kwargs
         Passed to 'matplotlib.pyplot.semilogy', add label to name the D curve.
+
+    Returns
+    -------
+    matplotlib AxesSubplot
     """
     if ax is None:
         fig = plt.figure()
@@ -196,3 +213,5 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     leg.get_frame().set_linewidth(0.0)
     leg.draggable()
     plt.tight_layout()
+
+    return ax

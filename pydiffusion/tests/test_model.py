@@ -19,16 +19,16 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 
-The test_model module contains for DiffProfile and DiffSystem objects.
+The test_model module contains tests for DiffProfile and DiffSystem objects.
 """
 
 import numpy as np
 from pydiffusion.core import DiffProfile, DiffSystem
 
 
-def test_profile():
+def test_profile(): 
     """
-    DiffProfile construction
+    DiffProfile constructor
     """
     dis = np.linspace(100, 0, 101)
     X = np.linspace(0, 1, 101)
@@ -36,7 +36,7 @@ def test_profile():
     profile = DiffProfile(dis=dis, X=X, If=If)
 
     assert len(profile.dis) == len(profile.X)
-    #assert isinstance(profile.name, str)
+    assert isinstance(profile.name, str)
     assert np.all(profile.dis[1:] >= profile.dis[:-1])
     assert len(profile.If) == len(If)+2
     assert len(profile.Ip) == len(If)+2
@@ -50,7 +50,7 @@ def test_profile():
 
 def test_system():
     """
-    DiffSystem construction
+    DiffSystem constructor
     """
     # Construct with X, DC
     Xr = [[0, .4], [.6, 1]]
@@ -59,7 +59,7 @@ def test_system():
     diffsys = DiffSystem(Xr=Xr, X=X, DC=DC)
 
     assert diffsys.Xr.shape == (diffsys.Np, 2)
-    #assert isinstance(diffsys.name, str)
+    assert isinstance(diffsys.name, str)
     assert len(diffsys.Dfunc) == diffsys.Np
     for i in range(diffsys.Np):
         assert len(diffsys.Dfunc[i][0]) == len(diffsys.Dfunc[i][1])
