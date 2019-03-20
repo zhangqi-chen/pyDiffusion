@@ -25,7 +25,6 @@ The test_utils module contains tests for pydiffusion utilities.
 import numpy as np
 from scipy.interpolate import splev
 from pydiffusion.core import DiffSystem
-from pydiffusion.io import read_csv
 from pydiffusion.simulation import sphSim
 from pydiffusion.utils import mesh, automesh, step, profilefunc, disfunc
 
@@ -48,7 +47,11 @@ def test_automesh():
     """
     automesh should return a meshed array whose length is within its range.
     """
-    profile, diffsys = read_csv('dataset.csv', Xlim=[0, 1])
+    diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-13])
+    dis = mesh(0, 1000, 201)
+    profile_init = step(dis, 500, diffsys)
+    time = 200 * 3600
+    profile = sphSim(profile_init, diffsys, time)
     dism = automesh(profile, diffsys, n=[300, 400])
 
     assert len(dism) >= 300 and len(dism) <= 400

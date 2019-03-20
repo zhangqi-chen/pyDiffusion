@@ -63,7 +63,7 @@ class DiffProfile(object):
 
         # dis must be ascending
         if not np.all(self.dis[1:] >= self.dis[:-1]):
-            self.X = [x for _, x in sorted(zip(self.dis, self.X))]
+            self.X = np.array([x for _, x in sorted(zip(self.dis, self.X))])
             self.dis.sort()
 
         d1, d2 = 0.5*(self.dis[1]-self.dis[0]), 0.5*(self.dis[-1]-self.dis[-2])

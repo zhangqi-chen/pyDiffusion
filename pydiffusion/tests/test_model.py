@@ -26,7 +26,7 @@ import numpy as np
 from pydiffusion.core import DiffProfile, DiffSystem
 
 
-def test_profile(): 
+def test_profile():
     """
     DiffProfile constructor
     """

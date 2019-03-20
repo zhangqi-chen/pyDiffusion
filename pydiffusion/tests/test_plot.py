@@ -21,9 +21,12 @@
 
 The test_plot verifies that the plot module produce plots without error.
 """
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from pydiffusion.io import read_csv
+from pydiffusion.core import DiffSystem, DiffProfile
+from pydiffusion.utils import mesh, step
+from pydiffusion.simulation import sphSim
 from pydiffusion.plot import profileplot, DCplot, SFplot
 plt.switch_backend('Agg')
 
@@ -32,7 +35,10 @@ def test_profileplot():
     """
     profileplot should return an axes object when a DiffProfile is passed
     """
-    profile, _ = read_csv('dataset.csv', Xlim=[0, 1])
+    dis = np.linspace(0, 100, 101)
+    X = np.linspace(0, 1, 101)
+    If = [30.5, 60.5]
+    profile = DiffProfile(dis=dis, X=X, If=If)
     ax = profileplot(profile, label='test')
 
     assert isinstance(ax, Axes)
@@ -42,8 +48,11 @@ def test_DCplot():
     """
     DCplot should return an axes object when a DiffSystem is passed
     """
-    _, diffsys = read_csv('dataset.csv', Xlim=[0, 1])
-    ax = DCplot(diffsys, label='Dtest')
+    Xr = [[0, .4], [.6, 1]]
+    X = np.linspace(0, 1, 101)
+    DC = np.linspace(1, 10, 101)*1e-14
+    diffsys = DiffSystem(Xr=Xr, X=X, DC=DC)
+    ax = DCplot(diffsys, label='test')
 
     assert isinstance(ax, Axes)
 
@@ -52,8 +61,11 @@ def test_SFplot():
     """
     SFplot should return an axes object when a DiffProfile and time is passed
     """
-    profile, _ = read_csv('dataset.csv', Xlim=[0, 1])
-    time = 1000*3600
-    ax = SFplot(profile, time, Xlim=[0, 1], label='SFtest')
+    diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-13])
+    dis = mesh(0, 1000, 201)
+    profile_init = step(dis, 500, diffsys)
+    time = 200 * 3600
+    profile = sphSim(profile_init, diffsys, time)
+    ax = SFplot(profile, time, Xlim=[0, 1], label='test')
 
     assert isinstance(ax, Axes)
