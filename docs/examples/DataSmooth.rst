@@ -9,7 +9,6 @@ Data smoothing can be implemented by ``pydiffusion.smooth.datasmooth``. (Current
 .. code-block:: python
 
     import pandas as pd
-    import matplotlib.pyplot as plt
     from pydiffusion.core import DiffProfile
     from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot
@@ -24,7 +23,7 @@ Raw diffusion profile data can be represented by a ``DiffProfile`` object, which
 
     data = pd.read_csv('examples/data/NiMo_exp.csv')
     dis, X = data['dis'], data['X']
-    NiMo_exp = DiffProfile(dis=dis, X=X)
+    NiMo_exp = DiffProfile(dis=dis, X=X, name='NiMo_exp')
 
 As long as using `1d-array like` type, you can read ``dis`` and ``X`` data from any file type.
 
@@ -38,10 +37,7 @@ Plot the raw data
 
 .. code-block:: python
 
-    ax = plt.figure().add_subplot(111)
-    ax.set_title('Ni-Mo 1100C 1000hrs')
-    profileplot(NiMo_exp, ax, c='b', marker='o', ls='none', fillstyle='none')
-    plt.show(block=False)
+    ax = profileplot(NiMo_exp, ax, c='b', marker='o', ls='none', fillstyle='none')
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth_files/DataSmooth_1.png
 
@@ -67,7 +63,7 @@ Profile in each phase will be plotted at first.
 
 .. code-block::
 
-    Zoom in? [n]**n**
+    Zoom in? [n]n
 
     No Change: Press ENTER (0 input)
     Constant: Enter the constant composition (1 input)
@@ -75,11 +71,11 @@ Profile in each phase will be plotted at first.
     Moving Radius: Start & end composition, smooth radius and times (4 inputs)
     (Unchanged end composition can be input by '-')
     Current ends: [0.0025311643355943733 0.2428008244781973]
-    **- - 20 2**
+    - - 20 2
 
-    Redo this smooth? (y/[n])**n**
+    Redo this smooth? (y/[n])n
 
-    Further smooth for this phase? (y/[n])**n**
+    Further smooth for this phase? (y/[n])n
 
 
 Phase 1 after smoothing:
@@ -88,7 +84,7 @@ Phase 1 after smoothing:
 
 .. code-block::
 
-    Zoom in? [n]**n**
+    Zoom in? [n]n
 
     No Change: Press ENTER (0 input)
     Constant: Enter the constant composition (1 input)
@@ -96,11 +92,11 @@ Phase 1 after smoothing:
     Moving Radius: Start & end composition, smooth radius and times (4 inputs)
     (Unchanged end composition can be input by '-')
     Current ends: [0.4945196711802708 0.5223486142653296]
-    **.495 .525 10 2**
+    .495 .525 10 2
 
-    Redo this smooth? (y/[n])**n**
+    Redo this smooth? (y/[n])n
 
-    Further smooth for this phase? (y/[n])**n**
+    Further smooth for this phase? (y/[n])n
 
 Phase 2 after smoothing:
 
@@ -108,7 +104,7 @@ Phase 2 after smoothing:
 
 .. code-block::
 
-    Zoom in? [n]**n**
+    Zoom in? [n]n
 
     No Change: Press ENTER (0 input)
     Constant: Enter the constant composition (1 input)
@@ -116,11 +112,11 @@ Phase 2 after smoothing:
     Moving Radius: Start & end composition, smooth radius and times (4 inputs)
     (Unchanged end composition can be input by '-')
     Current ends: [0.9779640502935792 0.9933157889470364]
-    **.978 .9935 5 1**
+    .978 .9935 5 1
 
-    Redo this smooth? (y/[n])**n**
+    Redo this smooth? (y/[n])n
 
-    Further smooth for this phase? (y/[n])**n**
+    Further smooth for this phase? (y/[n])n
     Smooth finished
 
 Phase 3 after smoothing:
@@ -133,8 +129,6 @@ Plot smoothed results
 .. code-block:: python
 
     profileplot(NiMo_sm, ax, c='r')
-    plt.pause(1.0)
-    plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DataSmooth_files/DataSmooth_3.png
 

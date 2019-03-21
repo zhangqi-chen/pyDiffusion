@@ -36,7 +36,7 @@ from pydiffusion.io import ita_start, ita_finish, ask_input
 
 def SF(profile, time, Xlim=[]):
     """
-    Use Sauer-Fraise method to calculate diffusion coefficients from profile.
+    Use Sauer-Freise method to calculate diffusion coefficients from profile.
 
     Parameters
     ----------
@@ -111,7 +111,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.cla()
     plt.title('LEFT side, select 2 points for linear fitting.')
     plt.plot(lbd[:id1], u[:id1], 'b.')
-    plt.xlabel('$\mathsf{\lambda}$')
+    plt.xlabel('$\lambda$')
     plt.ylabel('u')
     plt.pause(0.01)
     lbd1 = np.array(plt.ginput(2))[:, 0]
@@ -119,7 +119,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.cla()
     plt.title('RIGHT side, select 2 points for linear fitting.')
     plt.plot(lbd[id2:], u[id2:], 'b.')
-    plt.xlabel('$\mathsf{\lambda}$')
+    plt.xlabel('$\lambda$')
     plt.ylabel('u')
     plt.pause(0.01)
     lbd2 = np.array(plt.ginput(2))[:, 0]
@@ -138,7 +138,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.semilogy(X[:id1], DC_left[:id1], 'r--', lw=2)
     plt.semilogy(X[id2:], DC_right[id2:], 'r--', lw=2)
     plt.xlabel('Mole fraction', fontsize=15)
-    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$', fontsize=15)
+    plt.ylabel('Diffusion Coefficients '+'$(m^2/s)$', fontsize=15)
     plt.xlim(X.min(), X.max())
 
     return DC_left, DC_right
@@ -376,10 +376,12 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
 
     # Choose Spline or UnivariateSpline
     if Xspl is None or output:
-        plt.figure()
-        plt.semilogy(X, DC, 'b.')
-        plt.xlabel('Mole fraction')
-        plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+        ax = plt.figure().gca()
+        ax.semilogy(X, DC, 'b.')
+        ax.set_title('Sauer-Freise result')
+        ax.set_xlabel('Mole fraction')
+        ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
+        plt.tight_layout()
 
     ipt = ask_input('Use Spline (y) or UnivariateSpline (n) to model diffusion coefficients? [y]\n')
     choice = False if 'N' in ipt or 'n' in ipt else True
@@ -413,14 +415,15 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
         print(Xspl)
 
         if output:
-            plt.cla()
-            plt.title('DC Modeling Result')
-            plt.semilogy(X, DC, 'b.')
+            ax.cla()
+            ax.set_title('DC Modeling Result')
+            ax.semilogy(X, DC, 'b.')
             for i in range(Np):
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
-            plt.xlabel('Mole fraction')
-            plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+                ax.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+            ax.set_xlabel('Mole fraction')
+            ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
+            plt.tight_layout()
             plt.pause(1.0)
             plt.show()
 
@@ -441,14 +444,15 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
                 for k in pid:
                     if np.isnan(DC[k]) or np.isinf(DC[k]) or abs(np.log10(DC[k]/DCmean)) > 5:
                         DC[k] = DCmean
-                plt.cla()
-                plt.semilogy(X[pid], DC[pid], 'b.')
-                plt.xlabel('Mole fraction')
-                plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+                ax.cla()
+                ax.semilogy(X[pid], DC[pid], 'b.')
+                ax.set_xlabel('Mole fraction')
+                ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
+                ax.set_title('Phase %i' % (i+1))
                 plt.draw()
                 msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
                 ipt = ask_input(msg+'input # of spline points\n')
-                plt.title('Select %i points of Spline' % int(ipt))
+                ax.set_title('Phase %i: Select %i points of Spline' % (i+1, int(ipt)))
                 plt.pause(1.0)
                 Xp = np.array(plt.ginput(int(ipt)))[:, 0]
                 try:
@@ -459,7 +463,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
                     raise error
                 Xspl[i] = list(Xp)
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
+                ax.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
                 ipt = ask_input('Continue to next phase? [y]')
                 redo = False if 'N' in ipt or 'n' in ipt else True
@@ -469,20 +473,24 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
         # UnivariateSpline
         else:
             while True:
-                plt.cla()
-                plt.semilogy(X[pid], DC[pid], 'b.')
-                plt.xlabel('Mole fraction')
-                plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+                ax.cla()
+                ax.semilogy(X[pid], DC[pid], 'b.')
+                ax.set_xlabel('Mole fraction')
+                ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
+                #ax.set_title('Phase %i' % (i+1))
+                ax.set_title('Phase %i: Select 2 boundaries for UnivariateSpline' % (i+1))
                 plt.draw()
-                ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
-                Xp = np.array([float(x) for x in ipt.split(' ')])
+                plt.pause(1.0)
+                Xp = np.array(plt.ginput(2))[:, 0]
+                #ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
+                #Xp = np.array([float(x) for x in ipt.split()])
                 try:
                     fD[i] = Dfunc_uspl(X, DC, Xp, Xr[i])
                 except (ValueError, TypeError) as error:
                     ita_finish()
                     raise error
                 Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-                plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
+                ax.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-', lw=2)
                 plt.draw()
                 ipt = ask_input('Continue to next phase? [y]')
                 redo = False if 'N' in ipt or 'n' in ipt else True
@@ -494,18 +502,19 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     print('DC modeling finished, Xspl info:')
     print(Xspl)
 
-    plt.cla()
-    plt.title('DC Modeling Result')
-    plt.semilogy(X, DC, 'b.')
+    ax.cla()
+    ax.set_title('DC Modeling Result')
+    ax.semilogy(X, DC, 'b.')
     for i in range(Np):
         Xf = np.linspace(Xr[i, 0], Xr[i, 1], 30)
-        plt.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
-    plt.xlabel('Mole fraction')
-    plt.ylabel('Diffusion Coefficients '+'$\mathsf{(m^2/s)}$')
+        ax.semilogy(Xf, np.exp(splev(Xf, fD[i])), 'r-')
+    ax.set_xlabel('Mole fraction')
+    ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
+    plt.tight_layout()
     plt.pause(1.0)
     plt.show()
 
     if name == '':
-        name = profile.name+'_%.1fh_modeled' % (time/3600)
+        name = profile.name+'_%.1fh_Dmodeled' % (time/3600)
 
     return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl, name=name)

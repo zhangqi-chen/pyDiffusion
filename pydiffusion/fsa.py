@@ -103,6 +103,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
     SFplot(profile_sm, time, Xlim, ax2, ls='none', c='b', marker='.')
     DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
     plt.draw()
+    plt.tight_layout()
     plt.pause(1.0)
 
     n_sim = 0

@@ -21,8 +21,8 @@ Here we read previous results of Ni-Mo 1100C 1000 hours datasets, and plot them 
 
 .. code-block:: python
 
-    NiMo_sm, diffsys_init = read_csv('data/NiMo_DC_init.csv')
-    NiMo_exp, _ = read_csv('data/NiMo_exp.csv')
+    NiMo_sm, diffsys_init = read_csv('examples/data/NiMo_DC_init.csv')
+    NiMo_exp, _ = read_csv('examples/data/NiMo_exp.csv')
     Xp = [[.05, .2],
         [.5, .515],
         [.985]]
@@ -31,11 +31,11 @@ Here we read previous results of Ni-Mo 1100C 1000 hours datasets, and plot them 
 
     fig = plt.figure(figsize=(16, 6))
     ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
-    profileplot(NiMo_exp, ax1, ls='none', marker='o', fillstyle='none')
-    profileplot(NiMo_sm, ax1, c='g', lw=2)
-    SFplot(NiMo_sm, time, ax=ax2, Xlim=[0, 1])
+    profileplot(NiMo_exp, ax1, ls='none', c='b', marker='o', fillstyle='none')
+    profileplot(NiMo_sm, ax1, c='g', lw=2, label='NiMo_exp_smoothed')
+    SFplot(NiMo_sm, time, Xlim=[0, 1], ax=ax2, c='b', label='Sauer-Freise')
     DCplot(diffsys_init, ax2, c='r', lw=2)
-    plt.show()
+    plt.pause(1.0)
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA_files/FSA_1.png
 
@@ -110,12 +110,11 @@ FSA results
 
     fig = plt.figure(figsize=(16, 6))
     ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
-    profileplot(NiMo_exp, ax1, ls='none', marker='o', fillstyle='none')
-    profileplot(NiMo_sm, ax1, c='g', lw=2)
-    profileplot(NiMo_sim, ax1, c='r', lw=2)
-    SFplot(NiMo_sm, time, ax=ax2, Xlim=[0, 1])
-    DCplot(diffsys_fsa, ax2, c='r', lw=2)
-    plt.show()
+    profileplot(NiMo_exp, ax1, ls='none', c='b', marker='o', fillstyle='none')
+    profileplot(NiMo_sm, ax1, c='g', lw=2, label='NiMo_exp_smoothed')
+    profileplot(NiMo_sim, ax1, c='r', lw=2, label='FSA simulated')
+    SFplot(NiMo_sm, time, Xlim=[0, 1], ax=ax2, c='b', label='Sauer-Freise')
+    DCplot(diffsys_fsa, ax2, c='r', lw=2, label='FSA')
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA_files/FSA_2.png
 
@@ -126,7 +125,7 @@ Usually FSA results are saved by combining DC data with simulated profile data.
 
 .. code-block:: python
 
-    save_csv('NiMo.csv', NiMo_sim, diffsys_fsa)
+    save_csv('examples/NiMo.csv', NiMo_sim, diffsys_fsa)
 
 Congratulations! Now you can perform forward simulation analysis based on raw diffusion data!
 

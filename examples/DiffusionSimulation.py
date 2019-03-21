@@ -20,16 +20,13 @@ ax1.set_title('Diffusion Coefficients', fontsize=15)
 ax2.set_title('Initial Step Profile', fontsize=15)
 DCplot(diffsys, ax1)
 profileplot(profile_init, ax2)
-plt.show()
 
 # Diffusion simulation using the setups
 time = 200 * 3600
 profile_final = mphSim(profile_init, diffsys, time)
 
-ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-profileplot(profile_init, ax, ls='--')
+ax = profileplot(profile_init, ls='--')
 profileplot(profile_final, ax, c='r')
-plt.show()
 
 # Read diffusion coefficients data of Ni-Mo system
 data = pd.read_csv('examples/data/NiMo.csv')
@@ -57,7 +54,6 @@ ax2.set_title('Diffusion Simulation for 800 hours', fontsize=15)
 DCplot(diffsys_NiMo, ax1)
 profileplot(profile_NiMo_init, ax2, ls='--')
 profileplot(profile_NiMo, ax2, c='r')
-plt.show()
 
 # Save results
 save_csv('examples/data/NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)

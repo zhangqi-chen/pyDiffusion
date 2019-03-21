@@ -19,15 +19,13 @@ The error is analyzed by creating a bias on diffusion coefficients, this can be 
 
 .. code-block:: python
 
-    profile_fsa, diffsys_TiZr = read_csv('data/TiZr.csv', [0, 1])
-    profile_exp, _ = read_csv('data/TiZr_exp.csv')
+    profile_fsa, diffsys_TiZr = read_csv('examples/data/TiZr.csv', [0, 1])
+    profile_exp, _ = read_csv('examples/data/TiZr_exp.csv')
     diffsys_bias = DCbias(diffsys_TiZr, 0.2, 0.1)
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    DCplot(diffsys_TiZr, ax, label='original')
+    ax = DCplot(diffsys_TiZr, label='original')
     DCplot(diffsys_bias, ax, c='r', ls='--', label='bias')
-    plt.legend(fontsize=15)
-    plt.show()
+    plt.pause(1.0)
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis_files/ErrorAnalysis_1.png
 
@@ -88,9 +86,12 @@ Plot results
 
 .. code-block:: python
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    DCplot(diffsys_TiZr, ax, error_result)
-    plt.show()
+    fig = plt.figure(figsize=(16, 6))
+    ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
+    DCplot(diffsys_TiZr, ax1, error_result)
+    profileplot(profile_fsa, ax2, error_result)
+    profileplot(profile_exp, ax2, marker='o', ls='none', fillstyle='none')
+    plt.pause(1.0)
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis_files/ErrorAnalysis_2.png
 
@@ -100,9 +101,11 @@ The error bar is marked out around the original diffusion coefficients data. Nex
 
     error_result2 = ErrorAnalysis(profile_exp, profile_init, diffsys_TiZr, time, loc=21, accuracy=1e-3, output=False)
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    DCplot(diffsys_TiZr, ax, error_result2)
-    plt.show()
+    fig = plt.figure(figsize=(16, 6))
+    ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
+    DCplot(diffsys_TiZr, ax1, error_result2)
+    profileplot(profile_fsa, ax2, error_result2)
+    profileplot(profile_exp, ax2, marker='o', ls='none', fillstyle='none')
 
 .. code-block::
 

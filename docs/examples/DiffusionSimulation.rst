@@ -44,7 +44,6 @@ Then create a initial step profile (step at 500 micron, length = 1000 micron) be
     ax2.set_title('Initial Step Profile', fontsize=15)
     DCplot(diffsys, ax1)
     profileplot(profile_init, ax2)
-    plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation_files/DiffusionSimulation_1.png
 
@@ -59,10 +58,8 @@ Plot the results
 
 .. code-block:: python
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    profileplot(profile_init, ax, ls='--')
+    ax = profileplot(profile_init, ax, ls='--')
     profileplot(profile_final, ax, c='r')
-    plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation_files/DiffusionSimulation_2.png
 
@@ -112,7 +109,6 @@ Plot results
     DCplot(diffsys_NiMo, ax1)
     profileplot(profile_NiMo_init, ax2, ls='--')
     profileplot(profile_NiMo, ax2, c='r')
-    plt.show()
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation_files/DiffusionSimulation_3.png
 

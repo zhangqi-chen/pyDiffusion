@@ -8,7 +8,6 @@ Before **Forward Simulation Analysis (FSA)**, an initial modeling of diffusion c
 
 .. code-block:: python
 
-    import matplotlib.pyplot as plt
     from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot, DCplot, SFplot
     from pydiffusion.Dtools import Dmodel
@@ -20,11 +19,9 @@ Read smoothed profile data of Ni-Mo 1100C 1000 hours.
 
 .. code-block:: python
 
-    NiMo_sm, _ = read_csv('data/NiMo_sm.csv')
+    NiMo_sm, _ = read_csv('examples/data/NiMo_sm.csv')
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    profileplot(NiMo_sm, ax)
-    plt.show()
+    profileplot(NiMo_sm)
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DCModeling_files/DCModeling_1.png
 
@@ -117,10 +114,8 @@ Plot results:
 
 .. code-block:: python
 
-    ax = plt.figure(figsize=(8, 6)).add_subplot(111)
-    SFplot(NiMo_sm, time, Xlim=[0, 1], ax=ax)
-    DCplot(diffsys_init, ax, c='r')
-    plt.show()
+    ax = SFplot(NiMo_sm, time, Xlim=[0, 1])
+    DCplot(diffsys_init, ax)
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DCModeling_files/DCModeling_3.png
 
@@ -143,7 +138,7 @@ Usually smoothed profile and initial DC settings are saved together preparing fo
 
 .. code-block:: python
 
-    save_csv('NiMo_DC_init.csv', profile=NiMo_sm, diffsys=diffsys_init_auto)
+    save_csv('examples/data/NiMo_DC_init.csv', profile=NiMo_sm, diffsys=diffsys_init_auto)
 
 Make sure you remember the ``Xspl`` info if you are going to read data from .csv file before FSA!
 
