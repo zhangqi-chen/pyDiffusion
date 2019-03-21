@@ -104,7 +104,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
     DCplot(diffsys_sim, ax2, ls='-', c='r', lw=2)
     plt.draw()
     plt.tight_layout()
-    plt.pause(1.0)
+    plt.pause(0.1)
 
     n_sim = 0
     while True:
@@ -165,7 +165,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
 
                     DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
                     plt.draw()
-                    plt.pause(1.0)
+                    plt.pause(0.1)
                     ita_finish()
                     continue
 
@@ -190,7 +190,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
 
             DCplot(diffsys_sim, ax2, ls='-', c='m', lw=2)
             plt.draw()
-            plt.pause(1.0)
+            plt.pause(0.1)
             ita_finish()
 
     return profile_sim, diffsys_sim

@@ -84,7 +84,7 @@ def phasesmooth(dis, X, ax, phn=1):
         ipt = ask_input('Zoom in? [n]\n')
         if 'y' in ipt or 'Y' in ipt:
             ax.set_title('Select 2 points to zoom in')
-            plt.pause(1.0)
+            plt.pause(0.1)
             zm = np.array(plt.ginput(2))[:, 0]
         else:
             zm = [dis[0], dis[-1]]

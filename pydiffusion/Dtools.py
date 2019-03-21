@@ -113,7 +113,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.plot(lbd[:id1], u[:id1], 'b.')
     plt.xlabel('$\lambda$')
     plt.ylabel('u')
-    plt.pause(0.01)
+    plt.pause(0.1)
     lbd1 = np.array(plt.ginput(2))[:, 0]
 
     plt.cla()
@@ -121,7 +121,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.plot(lbd[id2:], u[id2:], 'b.')
     plt.xlabel('$\lambda$')
     plt.ylabel('u')
-    plt.pause(0.01)
+    plt.pause(0.1)
     lbd2 = np.array(plt.ginput(2))[:, 0]
 
     sp = np.where((lbd < max(lbd1)) & (lbd > min(lbd1)))[0]
@@ -424,7 +424,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
             ax.set_xlabel('Mole fraction')
             ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
             plt.tight_layout()
-            plt.pause(1.0)
+            plt.pause(0.1)
             plt.show()
 
         ita_finish()
@@ -453,7 +453,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
                 msg = '# of spline points: 1 (constant), 2 (linear), >2 (spline)\n'
                 ipt = ask_input(msg+'input # of spline points\n')
                 ax.set_title('Phase %i: Select %i points of Spline' % (i+1, int(ipt)))
-                plt.pause(1.0)
+                plt.pause(0.1)
                 Xp = np.array(plt.ginput(int(ipt)))[:, 0]
                 try:
                     Dp = Dpcalc(X, DC, Xp)
@@ -480,7 +480,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
                 #ax.set_title('Phase %i' % (i+1))
                 ax.set_title('Phase %i: Select 2 boundaries for UnivariateSpline' % (i+1))
                 plt.draw()
-                plt.pause(1.0)
+                plt.pause(0.1)
                 Xp = np.array(plt.ginput(2))[:, 0]
                 #ipt = ask_input('input 2 boundaries for UnivariateSpline\n')
                 #Xp = np.array([float(x) for x in ipt.split()])
@@ -511,7 +511,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     ax.set_xlabel('Mole fraction')
     ax.set_ylabel('Diffusion Coefficients '+'$(m^2/s)$')
     plt.tight_layout()
-    plt.pause(1.0)
+    plt.pause(0.1)
     plt.show()
 
     if name == '':
