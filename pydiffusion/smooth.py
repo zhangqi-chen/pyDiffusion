@@ -53,7 +53,7 @@ def movingradius(dis, X, r):
     return Xnew
 
 
-def phasesmooth(dis, X, ax):
+def phasesmooth(dis, X, ax, phn=1):
     """
     Data smooth of a single phase, Using movingradius method.
 
@@ -61,16 +61,23 @@ def phasesmooth(dis, X, ax):
     ----------
     dis, X : numpy.array
         Diffusion profile within a single phase
+    ax : matplotlib.axes.Axes
+        Plot axes
+    phn : int
+        Phase #
     """
-    mr_msg = 'Constant: Enter the constant composition (1 input)\n'\
+    mr_msg = 'No Change: Press ENTER (0 input)\n'\
+             'Constant: Enter the constant composition (1 input)\n'\
              'Linear: Enter the start and end composition (2 inputs)\n'\
-             'Moving Radius: Start & end composition, smooth radius and times (4 inputs)\n'
+             'Moving Radius: Start & end composition, smooth radius and times (4 inputs)\n'\
+             '(Unchanged end composition can be input by \'-\')\n'
 
     Xsm = X.copy()
     smoo = True
     while smoo:
         ax.cla()
         ax.plot(dis, Xsm, 'bo')
+        ax.set_title('Phase #%i' % phn)
         plt.draw()
 
         # Zoom in or not
@@ -87,36 +94,46 @@ def phasesmooth(dis, X, ax):
         while sm:
             ax.cla()
             ax.plot(dis[zmid], Xsm[zmid], 'bo')
+            ax.set_title('Phase #%i' % phn)
             plt.draw()
             Xsmn = np.copy(Xsm[zmid])
-            msg = mr_msg+'E.g. ['+str(Xsmn[0])+' '+str(Xsmn[-1])+' 1 1]\n'
+            msg = mr_msg+'Current ends: ['+str(Xsmn[0])+' '+str(Xsmn[-1])+']\n'
             while True:
                 ipt = ask_input(msg)
                 if len(ipt.split()) in (0, 1, 2, 4):
                     break
                 else:
                     print('Wrong inputs!')
+            # No change
+            if len(ipt.split()) == 0:
+                Xsmn = np.copy(Xsm[zmid])
             # Constant
-            if len(ipt.split()) == 1:
+            elif len(ipt.split()) == 1:
                 Xsmn[:] = float(ipt)
             # Linear
             elif len(ipt.split()) == 2:
                 dis_linear = [dis[zmid][0], dis[zmid][-1]]
-                X_linear = [float(i) for i in ipt.split()]
+                X_linear = [Xsmn[0], Xsmn[-1]]
+                ipt = ipt.split()
+                for i in range(2):
+                    if ipt[i] != '-':
+                        X_linear[i] = float(ipt[i])
                 f_linear = splrep(dis_linear, X_linear, k=1)
                 Xsmn = splev(dis[zmid], f_linear)
             # Moving radius
             else:
-                if len(ipt.split()) == 0:
-                    r, t = 1.0, 1
-                else:
-                    ipt = ipt.split()
-                    Xsmn[0], Xsmn[-1] = float(ipt[0]), float(ipt[1])
-                    r, t = float(ipt[2]), int(ipt[3])
+                ipt = ipt.split()
+                X_new = [Xsmn[0], Xsmn[-1]]
+                for i in range(2):
+                    if ipt[i] != '-':
+                        X_new[i] = float(ipt[i])
+                Xsmn[0], Xsmn[-1] = X_new[0], X_new[1]
+                r, t = float(ipt[2]), int(ipt[3])
                 for i in range(t):
                     Xsmn = movingradius(dis[zmid], Xsmn, r)
             ax.cla()
             ax.plot(dis[zmid], Xsm[zmid], 'bo', dis[zmid], Xsmn, 'ro')
+            ax.set_title('Phase #%i' % phn)
             plt.draw()
             ipt = ask_input('Redo this smooth? (y/[n])')
             sm = True if 'y' in ipt or 'Y' in ipt else False
@@ -124,6 +141,7 @@ def phasesmooth(dis, X, ax):
                 Xsm[zmid] = Xsmn
         ax.cla()
         ax.plot(dis, X, 'bo', dis, Xsm, 'ro')
+        ax.set_title('Phase #%i' % phn)
         plt.draw()
         ipt = ask_input('Further smooth for this phase? (y/[n])')
         smoo = True if 'y' in ipt or 'Y' in ipt else False
@@ -180,7 +198,7 @@ def datasmooth(profile, interface=[], n=2000, name=''):
     for i in range(Np):
         pid = np.where((disn > If[i]) & (disn < If[i+1]))[0]
         try:
-            Xn[pid] = phasesmooth(disn[pid], Xn[pid], ax)
+            Xn[pid] = phasesmooth(disn[pid], Xn[pid], ax, i+1)
         except (ValueError, TypeError) as error:
             ita_finish()
             raise error

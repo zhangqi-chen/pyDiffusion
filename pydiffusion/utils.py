@@ -123,7 +123,7 @@ def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     return np.array(dism)
 
 
-def step(dis, matano, diffsys, Xlim=[]):
+def step(dis, matano, diffsys, Xlim=[], name=''):
     """
     Create a step profile at the Matano Plane.
 
@@ -138,6 +138,8 @@ def step(dis, matano, diffsys, Xlim=[]):
     Xlim : list (float), optional
         Indicates the left and right concentration limits for step profile.
         Default value = [diffsys.Xr[0][0], diffsys.Xr[-1][1]].
+    name : str, optional
+        Name the output DiffProfile
 
     Returns
     -------
@@ -151,15 +153,17 @@ def step(dis, matano, diffsys, Xlim=[]):
         [XL, XR] = Xlim
     X = np.ones(len(dis))*XL
     X[dis > matano] = XR
+    if name == '':
+        name = diffsys.name+'_step'
     if Np == 1:
-        return DiffProfile(dis, X)
+        return DiffProfile(dis, X, name=name)
     else:
         If = [0]*(Np-1)
         Ip = np.where(X == XR)[0][0]
         d = dis[Ip] - dis[Ip-1]
         for i in range(Np-1):
             If[i] = dis[Ip-1] + d/(Np+1)*(i+1)
-        return DiffProfile(dis, X, If)
+        return DiffProfile(dis, X, If, name=name)
 
 
 def profilefunc(profile):

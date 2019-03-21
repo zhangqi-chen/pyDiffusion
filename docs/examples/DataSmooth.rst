@@ -22,7 +22,7 @@ Raw diffusion profile data can be represented by a ``DiffProfile`` object, which
 
 .. code-block:: python
 
-    data = pd.read_csv('data/NiMo_exp.csv')
+    data = pd.read_csv('examples/data/NiMo_exp.csv')
     dis, X = data['dis'], data['X']
     NiMo_exp = DiffProfile(dis=dis, X=X)
 
@@ -32,13 +32,13 @@ Profile data can also be read from a saved .csv file.
 
 .. code-block:: python
 
-    NiMo_exp, _ = read_csv('data/NiMo_exp.csv')
+    NiMo_exp, _ = read_csv('examples/data/NiMo_exp.csv')
 
 Plot the raw data
 
 .. code-block:: python
 
-    ax = plt.figure(1).add_subplot(111)
+    ax = plt.figure().add_subplot(111)
     ax.set_title('Ni-Mo 1100C 1000hrs')
     profileplot(NiMo_exp, ax, c='b', marker='o', ls='none', fillstyle='none')
     plt.show(block=False)
@@ -67,15 +67,19 @@ Profile in each phase will be plotted at first.
 
 .. code-block::
 
-    Enter the zoomed in start and end location, if no, enter nothing
+    Zoom in? [n]**n**
 
-    Enter Start and End Composition for this region: [0.00253116433559 0.242800824478]
+    No Change: Press ENTER (0 input)
+    Constant: Enter the constant composition (1 input)
+    Linear: Enter the start and end composition (2 inputs)
+    Moving Radius: Start & end composition, smooth radius and times (4 inputs)
+    (Unchanged end composition can be input by '-')
+    Current ends: [0.0025311643355943733 0.2428008244781973]
+    **- - 20 2**
 
-    Smooth Radius and Times: [1 1]
-    20 2
+    Redo this smooth? (y/[n])**n**
 
-    Redo this smooth? (y/[n])n
-    Further smooth for this phase? (y/[n])n
+    Further smooth for this phase? (y/[n])**n**
 
 
 Phase 1 after smoothing:
@@ -84,14 +88,19 @@ Phase 1 after smoothing:
 
 .. code-block::
 
-    Enter the zoomed in start and end location, if no, enter nothing
+    Zoom in? [n]**n**
 
-    Enter Start and End Composition for this region: [0.49451967118 0.522348614265]
-    .495 .525
-    Smooth Radius and Times: [1 1]
-    10 2
-    Redo this smooth? (y/[n])n
-    Further smooth for this phase? (y/[n])n
+    No Change: Press ENTER (0 input)
+    Constant: Enter the constant composition (1 input)
+    Linear: Enter the start and end composition (2 inputs)
+    Moving Radius: Start & end composition, smooth radius and times (4 inputs)
+    (Unchanged end composition can be input by '-')
+    Current ends: [0.4945196711802708 0.5223486142653296]
+    **.495 .525 10 2**
+
+    Redo this smooth? (y/[n])**n**
+
+    Further smooth for this phase? (y/[n])**n**
 
 Phase 2 after smoothing:
 
@@ -99,15 +108,20 @@ Phase 2 after smoothing:
 
 .. code-block::
 
-    Enter the zoomed in start and end location, if no, enter nothing
+    Zoom in? [n]**n**
 
-    Enter Start and End Composition for this region: [0.977964050294 0.993315788947]
-    .978 .9935
-    Smooth Radius and Times: [1 1]
-    5 1
-    Redo this smooth? (y/[n])n
-    Further smooth for this phase? (y/[n])n
-    Data smoothing finished
+    No Change: Press ENTER (0 input)
+    Constant: Enter the constant composition (1 input)
+    Linear: Enter the start and end composition (2 inputs)
+    Moving Radius: Start & end composition, smooth radius and times (4 inputs)
+    (Unchanged end composition can be input by '-')
+    Current ends: [0.9779640502935792 0.9933157889470364]
+    **.978 .9935 5 1**
+
+    Redo this smooth? (y/[n])**n**
+
+    Further smooth for this phase? (y/[n])**n**
+    Smooth finished
 
 Phase 3 after smoothing:
 
@@ -131,7 +145,7 @@ Smoothe profile can be saved as .csv, which can be read directly by ``read_csv``
 
 .. code-block:: python
 
-    save_csv('NiMo_sm.csv', profile=NiMo_sm)
+    save_csv('examples/data/NiMo_sm.csv', profile=NiMo_sm)
 
 After **Data Smoothing**, **Diffusion Coefficients Modeling** is required before **Forward Simulation Analysis**, see example_.
 

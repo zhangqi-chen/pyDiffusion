@@ -29,14 +29,14 @@ Define a diffusion system with constant diffusion coefficients 10\ :sup:`-14`\ m
 
 .. code-block:: python
 
-    diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14])
+    diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14], name='Constant D')
 
 Then create a initial step profile (step at 500 micron, length = 1000 micron) before simulation. To accomplish this, function ``mesh`` is used to mesh grids, and ``step`` is used to create a step profile upon meshed grids.
 
 .. code-block:: python
 
     dis = mesh(0, 1000, 501)
-    profile_init = step(dis, 500, diffsys)
+    profile_init = step(dis, 500, diffsys, name='Intitial step profile')
 
     fig = plt.figure(figsize=(16, 6))
     ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
@@ -73,7 +73,7 @@ The data required for diffusion simulation is the diffusion coefficients and sol
 
 .. code-block:: python
 
-    data = pd.read_csv('data/NiMo.csv')
+    data = pd.read_csv('examples/data/NiMo.csv')
     X, DC = data['X'], data['DC']
     Xr = np.array([[0, 0.25],
                 [0.49, 0.53],
@@ -86,7 +86,7 @@ You can also use `pydiffusion.io.read_csv` to read diffusion coefficients direct
 
 .. code-block:: python
 
-    _, diffsys_NiMo = read_csv('data/NiMo.csv', [0, 1])
+    _, diffsys_NiMo = read_csv('examples/data/NiMo.csv', [0, 1])
 
 Then create initial step profile as above.
 
@@ -123,4 +123,4 @@ Both diffusion profile and diffusion coefficient information can be saved into .
 
 .. code-block:: python
 
-    save_csv('NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)
+    save_csv('examples/data/NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)

@@ -50,7 +50,7 @@ def sphSim(profile, diffsys, time, output=True, name=''):
         Simulated diffusion profile
     """
     if name == '':
-        name = profile.name+'_%.1fh' % (time/3600)
+        name = diffsys.name+'_%.1fh' % (time/3600)
 
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
     fD = diffsys.Dfunc
@@ -109,7 +109,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     fD = [f for f in diffsys.Dfunc]
 
     if name == '':
-        name = profile.name+'_%.1fh' % (time/3600)
+        name = diffsys.name+'_%.1fh' % (time/3600)
 
     if len(If) != Np+1:
         raise ValueError('Number of phases mismatches between profile and diffusion system')

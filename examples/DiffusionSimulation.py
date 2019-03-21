@@ -8,11 +8,11 @@ from pydiffusion.plot import profileplot, DCplot
 from pydiffusion.io import read_csv, save_csv
 
 # Create diffusion system with constant DC
-diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14])
+diffsys = DiffSystem(Xr=[0, 1], X=[0, 1], DC=[1e-14, 1e-14], name='Constant D')
 
 # Create initial step profile
 dis = mesh(0, 1000, 501)
-profile_init = step(dis, 500, diffsys)
+profile_init = step(dis, 500, diffsys, name='Intitial step profile')
 
 fig = plt.figure(figsize=(16, 6))
 ax1, ax2 = fig.add_subplot(121), fig.add_subplot(122)
@@ -32,7 +32,7 @@ profileplot(profile_final, ax, c='r')
 plt.show()
 
 # Read diffusion coefficients data of Ni-Mo system
-data = pd.read_csv('data/NiMo.csv')
+data = pd.read_csv('examples/data/NiMo.csv')
 X, DC = data['X'], data['DC']
 Xr = np.array([[0, 0.25],
                [0.49, 0.53],
@@ -40,7 +40,7 @@ Xr = np.array([[0, 0.25],
 diffsys_NiMo = DiffSystem(Xr=Xr, X=X, DC=DC)
 
 # Read diffusion coefficients from saved data file by pydiffusion.io.save_csv
-_, diffsys_NiMo = read_csv('data/NiMo.csv', [0, 1])
+_, diffsys_NiMo = read_csv('examples/data/NiMo.csv', [0, 1])
 
 # Create initial step profile
 dis = mesh(0, 400, 301)
@@ -60,4 +60,4 @@ profileplot(profile_NiMo, ax2, c='r')
 plt.show()
 
 # Save results
-save_csv('NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)
+save_csv('examples/data/NiMo_800h.csv', profile=profile_NiMo, diffsys=diffsys_NiMo)
