@@ -59,6 +59,13 @@ The interdiffusion coefficients in Ti-Zr system at 1000C are calculated using FS
 
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis_files/ErrorAnalysis_3.png
 
+Citing
+~~~~~~
+
+If you use pydiffusion in your research, please consider citing the following article published in JORS:
+
+Chen, Z., Zhang, Q. and Zhao, J.-C., 2019. pydiffusion: A Python Library for Diffusion Simulation and Data Analysis. Journal of Open Research Software, 7(1), p.13. DOI: http://doi.org/10.5334/jors.255
+
 .. _Diffusion Simulation Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/DiffusionSimulation.rst
 .. _FSA Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/FSA.rst
 .. _Error Analysis Example: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis.rst

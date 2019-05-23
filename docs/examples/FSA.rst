@@ -51,9 +51,9 @@ Forward simulation analysis (FSA)
 3. If not, compare the simulated profile vs. smoothed profile, adjust the DC modeling using **Point Mode** or **Phase Mode**.
 4. Use the new DC modeling to simulate the diffusion process again...
 
-**Point Mode**: Can be applied only when reference points in **Spline** functions are provided, i.e. `DiffSystem.Xspl is not None`. Each diffusion coefficient value at reference point is adjusted at first, then **Spline** function is generated depending on adjusted diffusion coefficients. In the logD vs. X figure, ***the shape of DC curve might change***.
+**Point Mode**: Can be applied only when reference points in **Spline** functions are provided, i.e. `DiffSystem.Xspl is not None`. Each diffusion coefficient value at reference point is adjusted at first, then **Spline** function is generated depending on adjusted diffusion coefficients. In the logD vs. X figure, **the shape of DC curve might change**.
 
-**Phase Mode**: Can be applied on both **Spline** and **UnivariateSpline** modeling. The diffusion coefficients inside each phase are adjusted by the phase width comparison or manually input. In the logD vs. X figure, ***the shape of DC curve doesn't change***.
+**Phase Mode**: Can be applied on both **Spline** and **UnivariateSpline** modeling. The diffusion coefficients inside each phase are adjusted by the phase width comparison or manually input. In the logD vs. X figure, **the shape of DC curve doesn't change**.
 
 In the `FSA` function, default error is defined by the difference between smoothed profile and experimental profile. The error of each simulation round is defined by the difference between simulated profile and experimental profile.
 
