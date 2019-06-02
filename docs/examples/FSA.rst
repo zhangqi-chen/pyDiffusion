@@ -10,7 +10,7 @@ The process requires many mannual inputs as smoothing goes on, so please do not 
     import matplotlib.pyplot as plt
     from pydiffusion.io import read_csv, save_csv
     from pydiffusion.plot import profileplot, DCplot, SFplot
-    from pydiffusion.fsa import FSA
+    from pydiffusion.Dtools import FSA
 
 Read data from previous data smoothing & DC modeling
 ----------------------------------------------------

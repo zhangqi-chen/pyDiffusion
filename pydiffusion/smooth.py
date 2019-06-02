@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile
 from pydiffusion.io import ask_input, ita_start, ita_finish
+from pydiffusion.utils import check_mono
 
 
 def movingradius(dis, X, r):
@@ -143,6 +144,7 @@ def phasesmooth(dis, X, ax, phn=1):
         ax.plot(dis, X, 'bo', dis, Xsm, 'ro')
         ax.set_title('Phase #%i' % phn)
         plt.draw()
+        check_mono(dis, Xsm)
         ipt = ask_input('Further smooth for this phase? (y/[n])')
         smoo = True if 'y' in ipt or 'Y' in ipt else False
     return Xsm

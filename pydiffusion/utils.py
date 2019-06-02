@@ -218,6 +218,27 @@ def matanocalc(profile, Xlim=[]):
     return (np.trapz(X, dis)-dis[-1]*XR+dis[0]*XL)/(XL-XR)
 
 
+def check_mono(dis, X):
+    """
+    Check the monotonicity of a profile.
+    Return True if profile is monotonic.
+
+    Parameters
+    ----------
+    dis : Distance data
+    X : Concentration data
+    """
+    if X[-1] < X[0]:
+        X = 1-X
+    ip = np.where(X[1:] < X[:-1])[0]
+    if len(ip) == 0:
+        return True
+    else:
+        d1, d2 = dis[ip[0]], dis[ip[-1]+1]
+        print('Non-monotonicity found between %.2f and %.2f micron!' % (d1, d2))
+        return False
+
+
 def error_profile(profilesim, profileexp, w=None):
     """
     Calculate the difference (in mole fraction) between experimental profile

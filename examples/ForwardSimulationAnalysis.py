@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from pydiffusion.io import read_csv, save_csv
 from pydiffusion.plot import profileplot, DCplot, SFplot
-from pydiffusion.fsa import FSA
+from pydiffusion.Dtools import FSA
 
 # Read required data for FSA
 NiMo_sm, diffsys_init = read_csv('examples/data/NiMo_DC_init.csv')

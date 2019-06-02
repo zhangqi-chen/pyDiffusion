@@ -60,7 +60,7 @@ The interdiffusion coefficients in Ti-Zr system at 1000C are calculated using FS
 .. image:: https://github.com/zhangqi-chen/pyDiffusion/blob/master/docs/examples/ErrorAnalysis_files/ErrorAnalysis_3.png
 
 Citing
-~~~~~~
+------
 
 If you use pydiffusion in your research, please consider citing the following article published in JORS:
 
