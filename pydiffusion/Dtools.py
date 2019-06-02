@@ -1,26 +1,6 @@
 """
-    Copyright (c) 2018-2019 Zhangqi Chen
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-
 The Dtools module provides tools to calculate diffusion coefficients based on
-a diffusion profile, like Sauer-Fraise method, Hall method and Forward
+a diffusion profile, like Sauer-Freise method, Hall method and Forward
 Simulation Analysis (FSA). This module also provides the construction of
 DiffSystem by fitting a smooth diffusion coefficient curve based on
 Sauer-Fraise calculation results and the tools to adjust it.
@@ -31,15 +11,15 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev, UnivariateSpline
 from scipy.special import erfinv
 from pydiffusion.core import DiffSystem
-from pydiffusion.utils import disfunc, matanocalc, error_profile, step, automesh
+from pydiffusion.utils import disfunc, matanocalc, error_profile, step, automesh, SF
 from pydiffusion.io import ita_start, ita_finish, ask_input
 from pydiffusion.plot import profileplot, DCplot, SFplot
 from pydiffusion.simulation import mphSim
 
 
-def SF(profile, time, Xlim=[]):
+def SauerFreise(profile, time, Xlim=[]):
     """
-    Use Sauer-Freise method to calculate diffusion coefficients from profile.
+    Use Sauer-Freise method to calculate and virtualize diffusion coefficients.
 
     Parameters
     ----------
@@ -56,20 +36,8 @@ def SF(profile, time, Xlim=[]):
     DC : numpy.array
         Diffusion coefficients.
     """
-    try:
-        time = float(time)
-    except TypeError:
-        print('Cannot convert time to float')
-
-    dis, X = profile.dis, profile.X
-    [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
-    Y1 = (X-XL)/(XR-XL)
-    Y2 = 1-Y1
-    dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
-    dYds = np.append(dYds[0], np.append(dYds, dYds[-1]))
-    intvalue = np.array([Y2[i]*np.trapz(Y1[:i+1], dis[:i+1])+Y1[i]*(np.trapz(Y2[i:], dis[i:])) for i in range(len(dis))])
-    DC = intvalue/dYds/2/time*1e-12
-    DC[0], DC[-1] = DC[1], DC[-2]
+    SFplot(profile=profile, time=time, Xlim=Xlim)
+    DC = SF(profile=profile, time=time, Xlim=Xlim)
     return DC
 
 
@@ -523,7 +491,7 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     return DiffSystem(Xr, Dfunc=fD, Xspl=Xspl, name=name)
 
 
-def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, name=''):
+def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, f=None, alpha=0.3, name=''):
     """
     Forward Simulation Analysis
     Extract diffusion coefficients based on a diffusion profile.
@@ -550,6 +518,10 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
     w : list, optional
         Weights of each phase to calculate error.
         Passed to 'pydiffusion.utils.error_profile'.
+    f : function of Meshing
+        Keyword argument of automesh()
+    alpha : float
+        Keyword argument of automesh()
     name : str, optional
         Name of the output DiffProfile and DiffSystem
 
@@ -561,7 +533,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, n
         Calculated diffusion efficients by FSA.
     """
     # Create step profile on meshed grids
-    dism = automesh(profile_sm, diffsys, n)
+    dism = automesh(profile=profile_sm, diffsys=diffsys, n=n, f=f, alpha=alpha)
     matano = matanocalc(profile_sm, Xlim)
     if Xlim == [] and profile_sm.X[-1] < profile_sm.X[0]:
         profile_init = step(dism, matano, diffsys, [diffsys.Xr[-1, 1], diffsys.Xr[0, 0]])

@@ -1,24 +1,4 @@
 """
-    Copyright (c) 2018-2019 Zhangqi Chen
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-
 The utils module provides tools for diffusion data processing and analysis.
 """
 
@@ -59,7 +39,15 @@ def mesh(start=0, end=500, n=200, a=0):
     return dis
 
 
-def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
+def meshfunc_default(x, alpha=0.3):
+    """
+    Default meshing size vs. DC function in automesh()
+
+    """
+    return x**alpha
+
+
+def automesh(profile, diffsys, n=[400, 500], f=None, alpha=0.3):
     """
     Meshing for fast simulation similar to existing profile.
 
@@ -73,8 +61,10 @@ def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     n : list
         meshing number range, default = [400, 500]
     f : function of meshing
-        Meshing grid size is proportional to f(DC), default = DC**0.3
+        Meshing grid size is proportional to f(DC), default = DC**alpha
         DC is diffusion coefficients.
+    alpha : float
+        argument of meshfunc_default
 
     Returns
     -------
@@ -87,13 +77,12 @@ def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
     nmin, nmax = n
     dmin = dis[-1]/nmax/2
 
+    if f is None:
+        def f(x):
+            return meshfunc_default(x, alpha)
+
     # Create profile function fX
-    disn = dis.copy()
-    for i in range(len(X)-1):
-        if disn[i] == disn[i+1]:
-            disn[i] -= (disn[i]-dis[i-1])/1e5
-            disn[i+1] += (disn[i+2]-disn[i+1])/1e5
-    fX = splrep(disn, X, k=1)
+    fX = profilefunc(profile)
 
     # Create universal D function fDC
     Xf, Df = np.array([]), np.array([])
@@ -101,7 +90,7 @@ def automesh(profile, diffsys, n=[400, 500], f=lambda X: X**0.3):
         Xnew = np.linspace(Xr[i, 0], Xr[i, 1], 20)
         Xf = np.append(Xf, Xnew)
         Df = np.append(Df, np.exp(splev(Xnew, fD[i])))
-    fDC = splrep(Xf, np.log(Df), k=2)
+    fDC = splrep(Xf, np.log(Df), k=1)
 
     # Meshing
     while True:
@@ -216,6 +205,42 @@ def matanocalc(profile, Xlim=[]):
     else:
         raise ValueError('Xlim is a list with length = 2')
     return (np.trapz(X, dis)-dis[-1]*XR+dis[0]*XL)/(XL-XR)
+
+
+def SF(profile, time, Xlim=[]):
+    """
+    Use Sauer-Freise method to calculate diffusion coefficients from profile.
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Diffusion profile.
+    time : float
+        Diffusion time in seconds.
+    Xlim : list (float), optional
+        Indicates the left and right concentration limits for calculation.
+        Default value = [profile.X[0], profile.X[-1]].
+
+    Returns
+    -------
+    DC : numpy.array
+        Diffusion coefficients.
+    """
+    try:
+        time = float(time)
+    except TypeError:
+        print('Cannot convert time to float')
+
+    dis, X = profile.dis, profile.X
+    [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
+    Y1 = (X-XL)/(XR-XL)
+    Y2 = 1-Y1
+    dYds = (Y1[2:]-Y1[:-2])/(dis[2:]-dis[:-2])
+    dYds = np.append(dYds[0], np.append(dYds, dYds[-1]))
+    intvalue = np.array([Y2[i]*np.trapz(Y1[:i+1], dis[:i+1])+Y1[i]*(np.trapz(Y2[i:], dis[i:])) for i in range(len(dis))])
+    DC = intvalue/dYds/2/time*1e-12
+    DC[0], DC[-1] = DC[1], DC[-2]
+    return DC
 
 
 def check_mono(dis, X):
