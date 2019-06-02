@@ -23,7 +23,7 @@ The core module gives definition of main classes in pyDiffusion.
 """
 
 import numpy as np
-from scipy.interpolate import splrep
+from scipy.interpolate import splrep, splev
 
 
 class DiffProfile(object):
@@ -81,6 +81,34 @@ class DiffProfile(object):
         for i in range(1, len(self.Ip)-1):
             self.Ip[i] = np.where(self.dis > self.If[i])[0][0]
         self.Ip[-1] = len(dis)
+
+    def copy(self, dismax=None, Xmax=None):
+        """
+        Method to copy DiffProfile
+        Distance data or concentration data can be reversed
+
+        Parameters
+        ----------
+        dismax : if given, output distance data = dismax - dis
+        Xmax : if given, output concentration data = Xmax - X
+        """
+        if dismax is not None:
+            try:
+                dis = dismax-self.dis
+                If = dismax-self.If
+            except TypeError:
+                print('dismax must be a number')
+        else:
+            dis = self.dis
+            If = self.If
+        if Xmax is not None:
+            try:
+                X = Xmax-self.X
+            except TypeError:
+                print('Xmax must be a number')
+        else:
+            X = self.X
+        return DiffProfile(dis=dis, X=X, If=If[1:-1], name=self.name)
 
 
 class DiffSystem(object):
@@ -148,6 +176,29 @@ class DiffSystem(object):
             if len(Xspl) != self.Np:
                 raise ValueError('Length of Xspl must be equal to phase number Np')
         self.Xspl = Xspl
+
+    def copy(self, Xmax=None):
+        """
+        Method to copy DiffSystem
+        Concentration can be reversed
+
+        Parameters
+        ----------
+        Xmax : if given, output concentration = Xmax - X
+        """
+        if Xmax is None:
+            return DiffSystem(Xr=self.Xr, Dfunc=self.Dfunc, Xspl=self.Xspl, name=self.name)
+        else:
+            Xr = Xmax-self.Xr.flatten()[::-1]
+            Xr = Xr.reshape((self.Np, 2))
+            fD = [0]*self.Np
+            for i in range(self.Np):
+                k = self.Dfunc[-i-1][2]
+                X = np.linspace(Xr[i, 0], Xr[i, 1], 30)
+                DC = splev(Xmax-X, self.Dfunc[-i-1])
+                fD[i] = splrep(X, DC, k=k)
+            Xspl = None if self.Xspl is None else Xmax-self.Xspl[::-1]
+            return DiffSystem(Xr=Xr, Dfunc=fD, Xspl=Xspl, name=self.name)
 
 
 class DiffError(object):

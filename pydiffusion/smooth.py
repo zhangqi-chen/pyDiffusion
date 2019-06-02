@@ -212,8 +212,14 @@ def datasmooth(profile, interface=[], n=2000, name=''):
         pid = np.where(disn > If[i])[0][0]
         start = max(pid-5, np.where(disn > If[i-1])[0][0])
         end = min(pid+5, np.where(disn < If[i+1])[0][-1])
-        fX1 = splrep(disn[start:pid], Xn[start:pid], k=2)
-        fX2 = splrep(disn[pid:end], Xn[pid:end], k=2)
+        if start+2 < pid:
+            fX1 = splrep(disn[start:pid], Xn[start:pid], k=2)
+        else:
+            fX1 = splrep(disn[start:pid], Xn[start:pid], k=1)
+        if pid+1 < end:
+            fX2 = splrep(disn[pid:end+1], Xn[pid:end+1], k=2)
+        else:
+            fX2 = splrep(disn[pid:end+1], Xn[pid:end+1], k=1)
         disn = np.insert(disn, pid, [If[i], If[i]])
         Xn = np.insert(Xn, pid, [splev(If[i], fX1), splev(If[i], fX2)])
         Ip[i] = pid+1
