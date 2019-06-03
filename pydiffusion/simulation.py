@@ -82,6 +82,20 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     -------
     profile : DiffProfile
         Simulated diffusion profile
+
+    Examples
+    --------
+    With known diffusion coefficients (dsys), simulate profile of 100 hours of diffusion
+    for a diffusion couple experiment (initial profile is a step) on a 600 micron grids:
+
+    >>> dis = mesh(0, 600)
+    >>> init_profile = step(dis, 300, dsys)
+    >>> final_profile = mphSim(init_profile, dsys, 3600*100)
+
+    If liquid phase is attached to the left:
+
+    >>> final_profile = mphSim(init_profile, dsys, 3600*100, liquid=-1)
+
     """
     dis, Xs = profile.dis.copy()/1e6, profile.X.copy()
     Ip, If = profile.Ip.copy(), profile.If.copy()/1e6

@@ -58,6 +58,14 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     Returns
     -------
     matplotlib AxesSubplot
+
+    Examples
+    --------
+    Plot two profiles on one axis:
+
+    >>> ax = profileplot(profile1, c='b', label='profile1')
+    >>> profileplot(profile2, ax, c='r', label='profile2')
+
     """
     dis, X = profile.dis, profile.X
     clw = {'lw': 2, 'label': profile.name}
@@ -151,6 +159,12 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     Returns
     -------
     matplotlib AxesSubplot
+
+    Compare two diffusion coefficients data on one axis:
+
+    >>> ax = DCplot(dsys1, c='b', label='DC1')
+    >>> DCplot(dsys2, ax, c='r', label='DC2')
+
     """
     if ax is None:
         fig = plt.figure()

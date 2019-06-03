@@ -135,6 +135,8 @@ def datasmooth(profile, interface=[], n=2000, name=''):
     Data smooth of diffusion profile. The functions use moving radius method
     on each phase. Please do not close any plot window during the process.
 
+    datasmooth() is the first step of the forward simulation analysis (FSA).
+
     Parameters
     ----------
     profile: DiffProfile
@@ -147,6 +149,13 @@ def datasmooth(profile, interface=[], n=2000, name=''):
     Returns
     -------
     profile : pydiffusion.diffusion.DiffProfile
+
+    Examples
+    --------
+    Smooth the experimental profile (exp) with known interfaces [200, 300]:
+
+    >>> ds = datasmooth(exp, [200, 300])
+
     """
     dis, X = profile.dis, profile.X
     if len(dis) != len(X):

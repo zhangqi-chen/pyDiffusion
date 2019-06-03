@@ -308,6 +308,8 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     coefficients for each phase. Please do not close any plot window during
     the modeling process.
 
+    Dmodel() is the second step of the forward simulation analysis (FSA).
+
     Parameters
     ----------
     profile : DiffProfile
@@ -324,6 +326,15 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
         Plot Dmodel result or not. Can be False only if Xspl is given.
     name : str, optional
         Name of the output DiffSystem
+
+    Examples
+    --------
+    After datasmooth(), a initial diffusion coefficients will be established before
+    FSA():
+
+    >>> ds = datasmooth(exp)
+    >>> dsys = Dmodel(ds, time)
+
     """
     if not isinstance(Xlim, list):
         raise TypeError('Xlim must be a list')
@@ -497,6 +508,8 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, f
     Extract diffusion coefficients based on a diffusion profile.
     Please do not close any plot window during the FSA process.
 
+    This is the final step of FSA.
+
     Parameters
     ----------
     profile_exp : DiffProfile
@@ -531,6 +544,15 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, f
         Simulated diffusion profile after FSA.
     diffsys_sim : DiffSystem
         Calculated diffusion efficients by FSA.
+
+    Examples
+    --------
+    After datasmooth() and Dmodel(), FSA can be performed to calculate accurate diffusion coefficients:
+
+    >>> ds = datasmooth(exp)
+    >>> dsys = Dmodel(ds, time)
+    >>> fsa = FSA(exp, ds, dsys, time)
+
     """
     # Create step profile on meshed grids
     dism = automesh(profile=profile_sm, diffsys=diffsys, n=n, f=f, alpha=alpha)

@@ -21,6 +21,16 @@ class DiffProfile(object):
         Default value is [dis[0]-d1, dis[-1]+d2], d1 d2 are small values.
     name : str, optional
         Name of the current diffusion profile.
+
+    Examples
+    --------
+    Create a diffusion profile with 10 data points. Interfaces at [2.5, 3.5]:
+
+    >>> dis = np.arange(10)
+    >>> X = np.linspace(0, 1, 10)
+    >>> If = [2.5, 3.5]
+    >>> profile = DiffProfile(dis, X, If, name='test')
+
     """
 
     def __init__(self, dis, X, If=[], name='Profile'):
@@ -71,6 +81,18 @@ class DiffProfile(object):
         ----------
         dismax : if given, output distance data = dismax - dis
         Xmax : if given, output concentration data = Xmax - X
+
+        Examples
+        --------
+        Reverse a diffusion profile with distance:
+
+        >>> profile_r = profile.copy(dismax=1000)
+
+        For Fe-Ni diffusion couple, with known profile for Ni (profile_Ni),
+        calculate profile for Fe:
+
+        >>> profile_Fe = profile_Ni.copy(Xmax=1.0)
+
         """
         if dismax is not None:
             try:
@@ -109,6 +131,17 @@ class DiffSystem(object):
         simulation analysis.
     name : str, optional
         Name of the current diffusion system.
+
+
+    Examples
+    --------
+    Create a diffusion system with 3 phases, with known solubilities [0, 0.2], [0.4, 0.7] and [0.8, 1.0]:
+
+    >>> X = np.linspace(0, 1, 10)
+    >>> DC = np.linspace(1e-14, 1e-13, 10)
+    >>> Xr = [[0, 0.2], [0.4, 0.7], [0.8, 1.0]]
+    >>> dsys = DiffSystem(Xr=Xr, X=X, DC=DC, name='Dtest')
+
     """
 
     def __init__(self, Xr=[0, 1], Dfunc=None, X=None, DC=None, Xspl=None, name='System'):
@@ -165,6 +198,14 @@ class DiffSystem(object):
         Parameters
         ----------
         Xmax : if given, output concentration = Xmax - X
+
+        Examples
+        --------
+        For a Fe-Ni diffusion couple, with known diffusion coefficients as function
+        of Ni (dsys_Ni), calculate diffusion coefficients as funcition of Fe:
+
+        >>> dsys_Fe = dsys_Ni.copy(Xmax=1.0)
+
         """
         if Xmax is None:
             return DiffSystem(Xr=self.Xr, Dfunc=self.Dfunc, Xspl=self.Xspl, name=self.name)

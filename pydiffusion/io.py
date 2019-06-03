@@ -73,6 +73,12 @@ def save_csv(name=None, profile=None, diffsys=None):
         DiffProfile to save.
     diffsys : DiffSystem
         DiffSystem to save. diffsys can be saved by itself or with profile.
+
+    Examples
+    --------
+
+    >>> save_csv('data.csv', profile, dsys)
+
     """
     if profile is None and diffsys is None:
         raise ValueError('No data entered')
@@ -126,6 +132,17 @@ def read_csv(filename, Xlim=None, name=''):
         output DiffProfile object.
     diffsys : DiffSystem
         output DiffSystem object.
+
+    Examples
+    --------
+    Both profile and diffusivity data:
+
+    >>> profile, dsys = read_csv('data.csv')
+
+    Profile data only:
+
+    >>> profile, _ = read_csv('data.csv')
+
     """
     data = pd.read_csv(filename)
     if 'X' not in data.columns:

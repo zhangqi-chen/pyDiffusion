@@ -27,6 +27,13 @@ def mesh(start=0, end=500, n=200, a=0):
     -------
     dis : numpy.array
         Meshed grids information.
+
+    Examples
+    --------
+    Create a meshed 400 grids in 1000 microns with increasing grid sizes:
+
+    >>> dis = mesh(0, 1000, n=400, a=0.5)
+
     """
     if a == 0:
         dis = np.linspace(start, end, n)
@@ -50,6 +57,7 @@ def meshfunc_default(x, alpha=0.3):
 def automesh(profile, diffsys, n=[400, 500], f=None, alpha=0.3):
     """
     Meshing for fast simulation similar to existing profile.
+    This is usually used for a fast and accurate simulation of difficult systems.
 
     Parameters
     ----------
@@ -70,6 +78,29 @@ def automesh(profile, diffsys, n=[400, 500], f=None, alpha=0.3):
     -------
     dism: numpy.array
         Distance information after meshing.
+
+    Examples
+    --------
+    Create an efficient meshing grids with known diffusion profile (profile)
+    and diffusion coefficients (dsys). Grid number is about 500~600:
+
+    >>> dis = automesh(profile, dsys, [500, 600])
+
+    In FSA, profile is the smoothed profile from experimental data.
+    If profile is unknown, you can simulate one with mphSim() before automesh().
+
+    To perform an accurate simulation on a 600 micron grid, with known diffusion
+    coefficients (dsys) and simulation time (100 hours):
+
+    >>> dis = mesh(0, 600, 300)
+    >>> init_profile = step(dis, 300, dsys)
+    >>> profile = mphSim(init_profile, dsys, time=3600*100)
+    >>> dis = automesh(profile, dsys)
+
+    Then use new grids to perform accurate simulation:
+
+    >>> init_profile = step(dis, 300, dsys)
+    >>> profile = mphSim(init_profile, dsys, time=3600*100)
 
     """
     dis, X = profile.dis, profile.X
@@ -134,6 +165,14 @@ def step(dis, matano, diffsys, Xlim=[], name=''):
     -------
     profile : DiffProfile
         Step profile can be used for input of pydiffusion.simulation.mphSim
+
+    Examples
+    --------
+    Create a step profile on a meshed grid:
+
+    >>> dis = mesh()
+    >>> init_profile = step(dis, 200, dsys, Xlim=[0, 1])
+
     """
     Np = diffsys.Np
     if Xlim == []:
