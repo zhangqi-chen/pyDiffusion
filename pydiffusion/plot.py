@@ -31,6 +31,7 @@ def plot_lim(x1, x2, log=False):
     -------
     x1_lim, x2_lim : float
         Plot range output, used for plt.xlim or plt.set_ylim.
+
     """
     x1, x2 = min(x1, x2), max(x1, x2)
     if not log:
@@ -118,6 +119,7 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     Returns
     -------
     matplotlib AxesSubplot
+
     """
     X = profile.X
     sf = SF(profile, time, Xlim)

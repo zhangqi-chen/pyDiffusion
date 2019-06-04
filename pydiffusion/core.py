@@ -239,6 +239,7 @@ class DiffError(object):
         data['exp'] : Experimental collected data.
         data['ref'] : Reference simulated profile.
         data['error'] : Profiles that reaches error_cap during analysis.
+
     """
 
     def __init__(self, diffsys, loc, errors, profiles=None):

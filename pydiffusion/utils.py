@@ -195,7 +195,10 @@ def step(dis, matano, diffsys, Xlim=[], name=''):
 
 
 def profilefunc(profile):
-    "Create a tck interpolation (k=1) of the diffusion profile"
+    """
+    Create a tck interpolation (k=1) of the diffusion profile
+
+    """
     disn, Xn = profile.dis.copy(), profile.X.copy()
     for i in range(len(disn)-1):
         if disn[i] == disn[i+1]:
@@ -205,7 +208,10 @@ def profilefunc(profile):
 
 
 def disfunc(dis, X):
-    "Create a tck interpolation (k=1) of the dis vs. X profile"
+    """
+    Create a tck interpolation (k=1) of the dis vs. X profile
+
+    """
     Xmin, Xmax = (X[0], X[-1]) if X[0] < X[-1] else (X[-1], X[0])
     if list(X).count(Xmin) > 1 and list(X).count(Xmax) > 1:
         pid = np.where((X > Xmin) & (X < Xmax))[0]
@@ -235,6 +241,7 @@ def matanocalc(profile, Xlim=[]):
     -------
     matano : float
         Matano Plane location.
+
     """
     dis, X = profile.dis, profile.X
     if Xlim == []:
@@ -264,6 +271,7 @@ def SF(profile, time, Xlim=[]):
     -------
     DC : numpy.array
         Diffusion coefficients.
+
     """
     try:
         time = float(time)
@@ -291,6 +299,7 @@ def check_mono(dis, X):
     ----------
     dis : Distance data
     X : Concentration data
+
     """
     if X[-1] < X[0]:
         X = 1-X
@@ -322,6 +331,7 @@ def error_profile(profilesim, profileexp, w=None):
     -------
     error : float
         Averaged difference in mole fraction.
+
     """
     fX = profilefunc(profilesim)
     dissim, Xsim = profilesim.dis, profilesim.X
@@ -353,7 +363,10 @@ def error_profile(profilesim, profileexp, w=None):
 
 
 def efunc_default(X, Xf, r):
-    "Default efunc to create bias for diffusion coefficients"
+    """
+    Default efunc to create bias for diffusion coefficients
+
+    """
     if abs(Xf-X) <= r/2:
         deltae = 1-2*(X-Xf)**2/r**2
     elif Xf < X-r/2:

@@ -35,6 +35,7 @@ def SauerFreise(profile, time, Xlim=[]):
     -------
     DC : numpy.array
         Diffusion coefficients.
+
     """
     SFplot(profile=profile, time=time, Xlim=Xlim)
     DC = SF(profile=profile, time=time, Xlim=Xlim)
@@ -64,6 +65,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     DC_left, DC_right : numpy.array
         Diffusion coefficients by Hall method at left end and right end.
         Note: Only left part of DC_left and right part of DC_right are valid.
+
     """
     dis, X = profile.dis, profile.X
     [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
@@ -131,6 +133,7 @@ def Dpcalc(X, DC, Xp):
     -------
     Dp : 1d-array
         Estimated diffusion coefficients.
+
     """
     if len(Xp) == 1:
         fD = splrep(X, np.log(DC), k=1)
@@ -165,6 +168,7 @@ def Dfunc_spl(Xp, Dp):
         Composition list.
     Dp : 1d-array
         Corresponding diffusion coefficients at Xp.
+
     """
     if len(Xp) == 1:
         fDC = splrep([Xp[0], Xp[0]*1.01], [np.log(Dp[0]), np.log(Dp[0])], k=1)
@@ -187,6 +191,7 @@ def Dfunc_uspl(X, DC, Xp, Xr):
         UnivariateSpline range of X.
     Xr : 1d-array with shape (1, 2)
         Expanded range of UnivariateSpline, usually is the phase range.
+
     """
     pid = np.where((X >= Xp[0]) & (X <= Xp[-1]))[0]
     fDC = UnivariateSpline(X[pid], np.log(DC[pid]), bbox=[Xr[0], Xr[1]], k=2)
@@ -536,7 +541,7 @@ def FSA(profile_exp, profile_sm, diffsys, time, Xlim=[], n=[400, 500], w=None, f
     alpha : float
         Keyword argument of automesh()
     name : str, optional
-        Name of the output DiffProfile and DiffSystem
+        Name the output DiffProfile
 
     Returns
     -------

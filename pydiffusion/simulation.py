@@ -23,11 +23,14 @@ def sphSim(profile, diffsys, time, output=True, name=''):
         time in seconds.
     output : boolean, optional
         Print simulation progress, default = True.
+    name : str, optional
+        Name the output DiffProfile.
 
     Returns
     -------
     profile : DiffProfile
         Simulated diffusion profile
+
     """
     if name == '':
         name = diffsys.name+'_%.1fh' % (time/3600)
@@ -77,6 +80,8 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
         1 : Liquid phase attached at right.
     output : boolean, optional
         Print simulation progress, default = True.
+    name : str, optional
+        Name the output DiffProfile.
 
     Returns
     -------

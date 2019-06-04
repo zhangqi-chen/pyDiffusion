@@ -23,6 +23,7 @@ def movingradius(dis, X, r):
         Diffusion profile required to be smoothed
     r : float
         Radius (micron) of moving average
+
     """
     dmin, dmax = dis[0], dis[-1]
     n = np.size(dis)
@@ -46,6 +47,7 @@ def phasesmooth(dis, X, ax, phn=1):
         Plot axes
     phn : int
         Phase #
+
     """
     mr_msg = 'No Change: Press ENTER (0 input)\n'\
              'Constant: Enter the constant composition (1 input)\n'\
@@ -145,6 +147,8 @@ def datasmooth(profile, interface=[], n=2000, name=''):
         Np-1 locations of interfaces for a Np-phase system
     n : int
         Interpolation number of the smoothed profile
+    name : string, optional
+        Name the output DiffProfile
 
     Returns
     -------
