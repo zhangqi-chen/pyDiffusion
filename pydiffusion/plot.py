@@ -93,7 +93,7 @@ def profileplot(profile, ax=None, err=None, **kwargs):
     ax.tick_params(labelsize=tick_fontsize)
     leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
     leg.get_frame().set_linewidth(0.0)
-    leg.draggable()
+    leg.set_draggable(True)
     plt.tight_layout()
 
     return ax
@@ -137,7 +137,7 @@ def SFplot(profile, time, Xlim=[], ax=None, **kwargs):
     ax.tick_params(labelsize=tick_fontsize)
     leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
     leg.get_frame().set_linewidth(0.0)
-    leg.draggable()
+    leg.set_draggable(True)
     plt.tight_layout()
 
     return ax
@@ -207,7 +207,7 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     ax.tick_params(labelsize=tick_fontsize)
     leg = ax.legend(numpoints=1, fontsize=leg_fontsize)
     leg.get_frame().set_linewidth(0.0)
-    leg.draggable()
+    leg.set_draggable(True)
     plt.tight_layout()
 
     return ax

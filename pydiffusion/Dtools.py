@@ -248,8 +248,12 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
         print('Phase consumed found, increase adjustment rate')
         rate = 2
 
-    idref = np.where((Xref >= Xr[0]) & (Xref <= Xr[1]))[0]
-    idsim = np.where((Xsim >= Xr[0]) & (Xsim <= Xr[1]))[0]
+    if Xr[1] > Xr[0]:
+        idref = np.where((Xref >= Xr[0]) & (Xref <= Xr[1]))[0]
+        idsim = np.where((Xsim >= Xr[0]) & (Xsim <= Xr[1]))[0]
+    else:
+        idref = np.where((Xref <= Xr[0]) & (Xref >= Xr[1]))[0]
+        idsim = np.where((Xsim <= Xr[0]) & (Xsim >= Xr[1]))[0]
 
     if 'Xspl' in dir(diffsys):
         Xp = diffsys.Xspl[ph]
@@ -293,7 +297,10 @@ def Dadjust(profile_ref, profile_sim, diffsys, ph, pp=True, deltaD=None, r=0.02)
     for i in range(len(Xp)):
         # X1, X2 is the lower, upper bound to collect profile data
         # X1, X2 cannot exceed phase bound Xr
-        X1, X2 = max(Xp[i]-r, Xr[0]), min(Xp[i]+r, Xr[1])
+        if Xr[0] < Xr[1]:
+            X1, X2 = max(Xp[i]-r, Xr[0]), min(Xp[i]+r, Xr[1])
+        else:
+            X1, X2 = max(Xp[i]-r, Xr[1]), min(Xp[i]+r, Xr[0])
 
         # Calculate the gradient inside [X1, X2] by linear fitting
         fdis_ref = disfunc(dref, Xref)
@@ -346,8 +353,13 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     if len(Xlim) != 2 and Xlim != []:
         raise ValueError('Xlim must be an empty list or a list with length = 2')
 
-    # Initial set-up of Xr (phase boundaries)
     dis, X = profile.dis, profile.X
+
+    # If input Xlim doesn't follow trend of X, correct it
+    if Xlim != [] and (X[-1]-X[0])*(Xlim[1]-Xlim[0]) < 0:
+        Xlim = Xlim[::-1]
+
+    # Initial set-up of Xr (phase boundaries)
     Xlim = [X[0], X[-1]] if Xlim == [] else Xlim
     DC = SF(profile, time, Xlim)
     Xr = np.array(Xlim, dtype=float)
@@ -379,7 +391,10 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
             raise ValueError('Xspl must has a length of phase number')
 
         for i in range(Np):
-            pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+            if Xr[i, 1] > Xr[i, 0]:
+                pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+            else:
+                pid = np.where((X <= Xr[i, 0]) & (X >= Xr[i, 1]))[0]
 
             # Spline
             if choice:
@@ -421,7 +436,10 @@ def Dmodel(profile, time, Xspl=None, Xlim=[], output=True, name=''):
     Xspl = [0] * Np if choice else None
 
     for i in range(Np):
-        pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+        if Xr[i, 1] > Xr[i, 0]:
+            pid = np.where((X >= Xr[i, 0]) & (X <= Xr[i, 1]))[0]
+        else:
+            pid = np.where((X <= Xr[i, 0]) & (X >= Xr[i, 1]))[0]
 
         # Spline
         if choice:

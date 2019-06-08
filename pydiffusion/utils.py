@@ -158,6 +158,7 @@ def step(dis, matano, diffsys, Xlim=[], name=''):
     Xlim : list (float), optional
         Indicates the left and right concentration limits for step profile.
         Default value = [diffsys.Xr[0][0], diffsys.Xr[-1][1]].
+        For a decreasing step, Xlim must be provided.
     name : str, optional
         Name the output DiffProfile
 
@@ -168,10 +169,14 @@ def step(dis, matano, diffsys, Xlim=[], name=''):
 
     Examples
     --------
-    Create a step profile on a meshed grid:
+    Create a step profile on a meshed grid (ascending):
 
     >>> dis = mesh()
     >>> init_profile = step(dis, 200, dsys, Xlim=[0, 1])
+
+    Create a reversed step profile (descending):
+
+    >>> init_profile = step(dis, 200, dsys, Xlim=[1, 0])
 
     """
     Np = diffsys.Np
@@ -279,6 +284,11 @@ def SF(profile, time, Xlim=[]):
         print('Cannot convert time to float')
 
     dis, X = profile.dis, profile.X
+
+    # Correct the wrong Xlim input
+    if Xlim != [] and (X[-1]-X[0])*(Xlim[1]-Xlim[0]) < 0:
+        Xlim = Xlim[::-1]
+
     [XL, XR] = [X[0], X[-1]] if Xlim == [] else Xlim
     Y1 = (X-XL)/(XR-XL)
     Y2 = 1-Y1

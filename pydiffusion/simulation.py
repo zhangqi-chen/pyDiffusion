@@ -107,6 +107,11 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     Np, Xr = diffsys.Np, diffsys.Xr.copy()
     fD = [f for f in diffsys.Dfunc]
 
+    # Decreasing profile
+    if (Xs[-1]-Xs[0]) * (Xr[-1, 1]-Xr[0, 0]) < 0:
+        Xr = Xr.flatten()[::-1].reshape((Np, 2))
+        fD = fD[::-1]
+
     if name == '':
         name = diffsys.name+'_%.1fh' % (time/3600)
 
@@ -117,7 +122,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     try:
         time = float(time)
     except TypeError:
-        print('Wrong type for time variable')
+        print('Wrong Type of time')
 
     d = dis[1:]-dis[:-1]
     dj = 0.5*(d[1:]+d[:-1])
@@ -139,7 +144,8 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
                 Ipr = np.arange(Ip[i], Ip[i+1]-1)
                 DCs[Ipr] = np.exp(splev(Xm[Ipr], fD[i]))
                 Jf[Ipr] = -DCs[Ipr]*(Xs[Ipr+1]-Xs[Ipr])/d[Ipr]
-                dt = min(dt, min(abs(d[Ipr]**2/DCs[Ipr]/2)))
+                dtn = np.abs(d[Ipr]**2/DCs[Ipr]/2).min()
+                dt = dtn if dtn < dt else dt
             if Ip[i+1] == Ip[i]:
                 X0 = np.mean(Xr[i])
                 JIf[i, 1] = JIf[i+1, 0] = -(Xr[i, 1]-Xr[i, 0])/(If[i+1]-If[i])*np.exp(splev(X0, fD[i]))
@@ -156,32 +162,59 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
             vIf[i] = (JIf[i, 1]-JIf[i, 0])/(Xr[i, 0]-Xr[i-1, 1])
             vid = [Ip[i]-2] if Ip[i] > 1 else []
             vid += [Ip[i]] if Ip[i] < len(dis) else []
-            dt = min(dt, abs(min(d[vid]/vIf[i])))
+            dtn = np.abs(d[vid]/vIf[i]).min()
+            dt = dtn if dtn < dt else dt
             if i > 1 and vIf[i-1] > vIf[i]:
-                dt = min(dt, (If[i]-If[i-1])/(vIf[i-1]-vIf[i])/2)
+                dtn = (If[i]-If[i-1])/(vIf[i-1]-vIf[i])/2
+                dt = dtn if dtn < dt else dt
 
         # dt limited by grid nearby interfaces cannot exceed solubility limit
-        for i in range(Np):
-            if Ip[i+1] == Ip[i]:
-                continue
-            elif Ip[i+1] == Ip[i]+1:
-                if JIf[i, 1] > JIf[i+1, 0]:
-                    dt = min(dt, (Xr[i, 1]-Xs[Ip[i]])*dj[Ip[i]-1]/(JIf[i, 1]-JIf[i+1, 0]))
-                elif JIf[i, 1] < JIf[i+1, 0]:
-                    dt = min(dt, (Xs[Ip[i]]-Xr[i, 0])*dj[Ip[i]-1]/(JIf[i+1, 0]-JIf[i, 1]))
-            else:
-                if i < Np-1 and JIf[i+1, 0] < Jf[Ip[i+1]-2]:
-                    dt = min(dt, -(Xr[i, 1]-Xs[Ip[i+1]-1])/(JIf[i+1, 0]-Jf[Ip[i+1]-2])*dj[Ip[i+1]-2])
-                if i > 0 and Jf[Ip[i]] > JIf[i, 1]:
-                    dt = min(dt, (Xs[Ip[i]]-Xr[i, 0])/(Jf[Ip[i]]-JIf[i, 1])*dj[Ip[i]-1])
+        if Xr[0, 0] < Xr[-1, 1]:
+            for i in range(Np):
+                if Ip[i+1] == Ip[i]:
+                    continue
+                elif Ip[i+1] == Ip[i]+1:
+                    if JIf[i, 1] > JIf[i+1, 0]:
+                        dtn = (Xr[i, 1]-Xs[Ip[i]])*dj[Ip[i]-1]/(JIf[i, 1]-JIf[i+1, 0])
+                        dt = dtn if dtn < dt else dt
+                    elif JIf[i, 1] < JIf[i+1, 0]:
+                        dtn = (Xs[Ip[i]]-Xr[i, 0])*dj[Ip[i]-1]/(JIf[i+1, 0]-JIf[i, 1])
+                        dt = dtn if dtn < dt else dt
+                else:
+                    if i < Np-1 and JIf[i+1, 0] < Jf[Ip[i+1]-2]:
+                        dtn = -(Xr[i, 1]-Xs[Ip[i+1]-1])/(JIf[i+1, 0]-Jf[Ip[i+1]-2])*dj[Ip[i+1]-2]
+                        dt = dtn if dtn < dt else dt
+                    if i > 0 and Jf[Ip[i]] > JIf[i, 1]:
+                        dtn = (Xs[Ip[i]]-Xr[i, 0])/(Jf[Ip[i]]-JIf[i, 1])*dj[Ip[i]-1]
+                        dt = dtn if dtn < dt else dt
+        else:
+            for i in range(Np):
+                if Ip[i+1] == Ip[i]:
+                    continue
+                elif Ip[i+1] == Ip[i]+1:
+                    if JIf[i, 1] < JIf[i+1, 0]:
+                        dtn = (Xr[i, 1]-Xs[Ip[i]])*dj[Ip[i]-1]/(JIf[i, 1]-JIf[i+1, 0])
+                        dt = dtn if dtn < dt else dt
+                    elif JIf[i, 1] > JIf[i+1, 0]:
+                        dtn = (Xs[Ip[i]]-Xr[i, 0])*dj[Ip[i]-1]/(JIf[i+1, 0]-JIf[i, 1])
+                        dt = dtn if dtn < dt else dt
+                else:
+                    if i < Np-1 and JIf[i+1, 0] > Jf[Ip[i+1]-2]:
+                        dtn = -(Xr[i, 1]-Xs[Ip[i+1]-1])/(JIf[i+1, 0]-Jf[Ip[i+1]-2])*dj[Ip[i+1]-2]
+                        dt = dtn if dtn < dt else dt
+                    if i > 0 and Jf[Ip[i]] < JIf[i, 1]:
+                        dtn = (Xs[Ip[i]]-Xr[i, 0])/(Jf[Ip[i]]-JIf[i, 1])*dj[Ip[i]-1]
+                        dt = dtn if dtn < dt else dt
 
         dt = time-t if t+dt > time else dt*0.95
 
         # If first or last phase will be consumed
         if If[1] < dis[1] and vIf[1] < 0:
-            dt = min(dt, (dis[0]-If[1])/vIf[1])
+            dtn = (dis[0]-If[1])/vIf[1]
+            dt = dtn if dtn < dt else dt
         elif If[-2] > dis[-2] and vIf[-2] > 0:
-            dt = min(dt, (dis[-1]-If[-2])/vIf[-2])
+            dtn = (dis[-1]-If[-2])/vIf[-2]
+            dt = dtn if dtn < dt else dt
 
         t += dt
         m += 1

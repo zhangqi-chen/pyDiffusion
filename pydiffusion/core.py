@@ -121,6 +121,7 @@ class DiffSystem(object):
     ----------
     Xr : List with length of 2 or array-like with shape (,2), optional
         Concentration range for each phase, default = [0,1].
+        Ascending list is recommended.
         Save Xr.shape[0] to phase number DiffSystem.Np.
     Dfunc : list of tck tuple, optional
         Np of tck tuple describe the diffusion coefficient function for each phase.
