@@ -43,7 +43,7 @@ class DiffProfile(object):
         try:
             self.name = str(name)
         except TypeError:
-            print('name must be able to convert to str type')
+            print('Can not convert name to str type')
 
         if self.dis.ndim != 1 or self.X.ndim != 1:
             raise ValueError('1d data is required')
@@ -115,7 +115,7 @@ class DiffProfile(object):
 
 class DiffSystem(object):
     """
-    Diffusion System with diffusion coefficients modeling
+    Binary diffusion System with diffusion coefficients modeling
 
     Parameters
     ----------
@@ -225,7 +225,7 @@ class DiffSystem(object):
 
 class DiffError(object):
     """
-    Error analysis result of diffusion system
+    Error analysis result of binary diffusion system
 
     Parameters
     ----------
@@ -249,3 +249,77 @@ class DiffError(object):
         self.errors = errors
         if profiles is not None:
             self.profiles = profiles
+
+
+class Profile1D(object):
+    """
+    1D diffusion profile for ternary system
+
+    """
+
+    def __init__(self, dis, X1, X2, X3=None, name='1D Profile'):
+        try:
+            self.dis = np.array(dis, dtype=float)
+        except TypeError:
+            print('Can not convert dis input into 1d-array')
+
+        self.n = self.dis.size
+
+        if float(X1) is float:
+            self.X1 = np.ones(self.n)*float(X1)
+        elif X1.shape == (self.n, ):
+            self.X1 = X1
+        else:
+            raise ValueError('X1 must be an 2D array of shape (%i, ) or a constant' % self.n)
+
+        if float(X2) is float:
+            self.X2 = np.ones(self.n)*float(X2)
+        elif X2.shape == (self.n, ):
+            self.X2 = X2
+        else:
+            raise ValueError('X2 must be an 2D array of shape (%i, ) or a constant' % self.n)
+
+        self.X3 = np.ones(self.n)-self.X1-self.X2
+
+
+class Profile2D(object):
+    """
+    2D diffusion profile for ternary system
+
+    """
+
+    def __init__(self, disx, disy, X1, X2, X3=None, name='2D Profile'):
+        try:
+            self.disx = np.array(disx, dtype=float)
+            self.disy = np.array(disy, dtype=float)
+        except TypeError:
+            print('Can not convert dis input into 1d-array')
+
+        self.nx = self.disx.size
+        self.ny = self.disy.size
+
+        if float(X1) is float:
+            self.X1 = np.ones((self.ny, self.nx))*float(X1)
+        elif X1.shape == (self.ny, self.nx):
+            self.X1 = X1
+        else:
+            raise ValueError('X1 must be an 2D array of shape (%i, %i) or a float' % (self.ny, self.nx))
+
+        if float(X2) is float:
+            self.X2 = np.ones((self.ny, self.nx))*float(X2)
+        elif X2.shape == (self.ny, self.nx):
+            self.X2 = X2
+        else:
+            raise ValueError('X2 must be an 2D array of shape (%i, %i) or a float' % (self.ny, self.nx))
+
+        self.X3 = np.ones((self.ny, self.nx))-self.X1-self.X2
+
+
+class TSystem(object):
+    """
+    Ternary diffusion system
+
+    """
+
+    def __init__(self, Dfunc, name='Ternary System'):
+        self.fD = Dfunc

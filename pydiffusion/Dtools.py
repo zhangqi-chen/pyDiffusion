@@ -84,7 +84,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.cla()
     plt.title('LEFT side, select 2 points for linear fitting.')
     plt.plot(lbd[:id1], u[:id1], 'b.')
-    plt.xlabel('$\lambda$')
+    plt.xlabel('lambda')
     plt.ylabel('u')
     plt.pause(0.1)
     lbd1 = np.array(plt.ginput(2))[:, 0]
@@ -92,7 +92,7 @@ def Hall(profile, time, Xlim=[], a=0.25):
     plt.cla()
     plt.title('RIGHT side, select 2 points for linear fitting.')
     plt.plot(lbd[id2:], u[id2:], 'b.')
-    plt.xlabel('$\lambda$')
+    plt.xlabel('lambda')
     plt.ylabel('u')
     plt.pause(0.1)
     lbd2 = np.array(plt.ginput(2))[:, 0]

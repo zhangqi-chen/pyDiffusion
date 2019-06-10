@@ -5,8 +5,8 @@ simulation-based error analysis tools.
 
 import numpy as np
 from scipy.interpolate import splev, splrep
-from pydiffusion.core import DiffProfile, DiffError
-from pydiffusion.utils import error_profile, DCbias, profilefunc
+from pydiffusion.core import DiffProfile, DiffError, Profile1D, Profile2D
+from pydiffusion.utils import error_profile, DCbias, profilefunc, polyval2d
 
 
 def sphSim(profile, diffsys, time, output=True, name=''):
@@ -107,7 +107,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
     Np, Xr = diffsys.Np, diffsys.Xr.copy()
     fD = [f for f in diffsys.Dfunc]
 
-    # Decreasing profile
+    # Ascending or descending profile
     if (Xs[-1]-Xs[0]) * (Xr[-1, 1]-Xr[0, 0]) < 0:
         Xr = Xr.flatten()[::-1].reshape((Np, 2))
         fD = fD[::-1]
@@ -431,3 +431,133 @@ def ErrorAnalysis(profile_exp, profile_init, diffsys, time, loc=10, w=None,
     differror = DiffError(diffsys, loc, errors, data)
 
     return differror
+
+
+def T1DsphSim(profile, tsys, time, name=''):
+    """
+    1D diffusion simulation of single-phase ternary system.
+
+    """
+    if name == '':
+        name = tsys.name+'_%.1fh' % (time/3600)
+
+    dis = profile.dis
+    X1, X2 = np.copy(profile.X1), np.copy(profile.X2)
+    fD11, fD12, fD21, fD22 = tsys.fD
+    t, m = 0, 0
+    d = (dis[-1]-dis[0])/(dis.size-1)
+
+    while t < time:
+        X1m = (X1[1:]+X1[:-1])/2
+        X2m = (X2[1:]+X2[:-1])/2
+
+        D11 = np.exp(polyval2d(X1m, X2m, fD11))
+        D12 = np.exp(polyval2d(X1m, X2m, fD12))
+        D21 = np.exp(polyval2d(X1m, X2m, fD21))
+        D22 = np.exp(polyval2d(X1m, X2m, fD22))
+
+        dt = d**2/max(D11.max(), D12.max(), D21.max(), D22.max())/4
+
+        dt = time-t if t+dt > time else dt*0.95
+        t += dt
+        m += 1
+
+        g1 = (X1[1:]-X1[:-1])/d
+        g2 = (X2[1:]-X2[:-1])/d
+
+        J1 = -D11*g1-D12*g2
+        J2 = -D21*g1-D22*g2
+
+        X1[1:-1] -= dt*(J1[1:]-J1[:-1])/d
+        X2[1:-1] -= dt*(J2[1:]-J2[:-1])/d
+
+        X1[X1 < 0] = 0
+        X2[X2 < 0] = 0
+        Xsum = X1+X2
+        X1[Xsum > 1] = X1[Xsum > 1]/Xsum[Xsum > 1]
+        X2[Xsum > 1] = X2[Xsum > 1]/Xsum[Xsum > 1]
+
+        X1[0] -= J1[0]/d*dt*2
+        X1[-1] += J1[-1]/d*dt*2
+        X2[0] -= J2[0]/d*dt*2
+        X2[-1] += J2[-1]/d*dt*2
+
+        if np.mod(m, 3e4) == 0:
+            print('1D Simulation %.3f out of %.3f hrs complete' % (t/3600, time/3600))
+
+    return Profile1D(dis, X1, X2, name=name)
+
+
+def T2DsphSim(profile, tsys, time, name=''):
+    """
+    2D diffusion simulation of single-phase ternary system.
+
+    """
+    if name == '':
+        name = tsys.name+'_%.1fh' % (time/3600)
+
+    disx, disy = profile.disx, profile.disy
+    nx, ny = profile.nx, profile.ny
+    X1, X2 = np.copy(profile.X1), np.copy(profile.X2)
+    fD11, fD12, fD21, fD22 = tsys.fD
+    t, m = 0, 0
+    dx = (disx[-1]-disx[0])/(nx-1)
+    dy = (disy[-1]-disy[0])/(ny-1)
+    d = min(dx, dy)
+
+    while t < time:
+        X1xm = (X1[:, 1:]+X1[:, :-1])/2
+        X1ym = (X1[1:, :]+X1[:-1, :])/2
+        X2xm = (X2[:, 1:]+X2[:, :-1])/2
+        X2ym = (X2[1:, :]+X2[:-1, :])/2
+
+        g1x = (X1[:, 1:]-X1[:, :-1])/dx
+        g1y = (X1[1:, :]-X1[:-1, :])/dy
+        g2x = (X2[:, 1:]-X2[:, :-1])/dx
+        g2y = (X2[1:, :]-X2[:-1, :])/dy
+
+        D11x = np.exp(polyval2d(X1xm, X2xm, fD11))
+        D11y = np.exp(polyval2d(X1ym, X2ym, fD11))
+        D12x = np.exp(polyval2d(X1xm, X2xm, fD12))
+        D12y = np.exp(polyval2d(X1ym, X2ym, fD12))
+        D21x = np.exp(polyval2d(X1xm, X2xm, fD21))
+        D21y = np.exp(polyval2d(X1ym, X2ym, fD21))
+        D22x = np.exp(polyval2d(X1xm, X2xm, fD22))
+        D22y = np.exp(polyval2d(X1ym, X2ym, fD22))
+
+        dt = d**2/max(D11x.max(), D12x.max(), D21x.max(), D22x.max(),
+                      D11y.max(), D12y.max(), D21y.max(), D22y.max())/4
+
+        dt = time-t if t+dt > time else dt*0.95
+        t += dt
+        m += 1
+
+        J1x = -D11x*g1x-D12x*g2x
+        J1y = -D11y*g1y-D12y*g2y
+        J2x = -D21x*g1x-D22x*g2x
+        J2y = -D21y*g1y-D22y*g2y
+
+        X1[:, 1:-1] -= dt*(J1x[:, 1:]-J1x[:, :-1])/dx
+        X1[1:-1, :] -= dt*(J1y[1:, :]-J1y[:-1, :])/dy
+        X2[:, 1:-1] -= dt*(J2x[:, 1:]-J2x[:, :-1])/dx
+        X2[1:-1, :] -= dt*(J2y[1:, :]-J2y[:-1, :])/dy
+
+        X1[X1 < 0] = 0
+        X2[X2 < 0] = 0
+        Xsum = X1+X2
+        X1[Xsum > 1] = X1[Xsum > 1]/Xsum[Xsum > 1]
+        X2[Xsum > 1] = X2[Xsum > 1]/Xsum[Xsum > 1]
+
+        X1[:, 0] -= J1x[:, 0]/dx*dt*2
+        X1[:, -1] += J1x[:, -1]/dx*dt*2
+        X1[0, :] -= J1y[0, :]/dy*dt*2
+        X1[-1, :] += J1y[-1, :]/dy*dt*2
+        X2[:, 0] -= J2x[:, 0]/dx*dt*2
+        X2[:, -1] += J2x[:, -1]/dx*dt*2
+        X2[0, :] -= J2y[0, :]/dy*dt*2
+        X2[-1, :] += J2y[-1, :]/dy*dt*2
+
+        if np.mod(m, 3e3) == 0:
+            print('2D Simulation %.3f out of %.3f hrs complete' % (t/3600, time/3600))
+
+    return Profile2D(disx, disy, X1, X2, name=name)

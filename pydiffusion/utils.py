@@ -3,6 +3,7 @@ The utils module provides tools for diffusion data processing and analysis.
 """
 
 import numpy as np
+import itertools
 from scipy.interpolate import splev, splrep
 from pydiffusion.core import DiffProfile, DiffSystem
 
@@ -300,6 +301,50 @@ def SF(profile, time, Xlim=[]):
     return DC
 
 
+def Jflux(profile, loc, time, Xlim=[]):
+    """
+    Calculate the mass flux according to existing profile.
+
+    Parameters
+    ----------
+    profile : DiffProfile
+        Existing diffusion profile.
+    loc : float
+        Location to calculate mass flux.
+    time : float
+        Diffusion time in seconds.
+    Xlim : list, optional
+        Indicates the left and right concentration limits for calculation.
+        Default value = [profile.X[0], profile.X[-1]].
+
+    Returns
+    -------
+    Jf : float
+        Mass flux at loc.
+    """
+    d, X = profile.dis.copy(), profile.X.copy()
+
+    if loc > d.max() or loc < d.min():
+        raise ValueError('loc is out of range of distance data')
+
+    if Xlim == []:
+        Xlim = [X[0], X[-1]]
+
+    XL, XR = Xlim[0], Xlim[1]
+    Y1 = np.array((X-XR)/(XL-XR))
+
+    ip = np.where(d > loc)[0][0]
+    fX = splrep(d, Y1, k=1)
+    Y = float(splev(loc, fX))
+
+    d = np.insert(d, ip, loc)
+    Y1 = np.insert(Y1, ip, Y)
+    intvalue = Y1[ip]*np.trapz(1-Y1[:ip+1], d[:ip+1])+(1-Y1[ip])*np.trapz(Y1[ip:], d[ip:])
+    Jf = intvalue/2/time*(XL-XR)/1e6
+
+    return Jf
+
+
 def check_mono(dis, X):
     """
     Check the monotonicity of a profile.
@@ -427,3 +472,229 @@ def DCbias(diffsys, X, deltaD, r=0.3, efunc=None):
         else:
             fDbias += [fD[i]]
     return DiffSystem(Xr, fDbias)
+
+
+def c2xy(x1, x2):
+    """
+    Convert ternary compositions to (x, y) coordinates of a ternary
+    phase diagram.
+
+    Parameters
+    ----------
+    x1, x2 : float or array-like, within [0, 1]
+        Composition at the left-lower and right-lower corner component
+        of a ternary phase diagram.
+
+    Returns
+    -------
+    x : float or array-like, within [0, 1]
+        x coordinates of ternary phase diagram.
+    y : float or array-like, within [0, 0.866]
+        y coordinates of ternary phase diagram.
+
+    """
+    if np.shape(x1) != np.shape(x2):
+        raise ValueError('Shape of x1 and x2 must be the same')
+
+    x3 = 1-x1-x2
+    y = x3*np.sqrt(3)/2
+    x = x2+x3/2
+    return x, y
+
+
+def xy2c(x, y):
+    """
+    Convert (x, y) coordinates of ternary phase diagram to a ternary
+    compositions.
+
+    Parameters
+    ----------
+    x : float or array-like, within [0, 1]
+        x coordinates of ternary phase diagram.
+    y : float or array-like, within [0, 0.866]
+        y coordinates of ternary phase diagram.
+
+    Returns
+    -------
+    x1, x2, x3 : float or array-like, within [0, 1]
+        Composition of the left-lower, right-lower and top corner component
+        of a ternary phase diagram.
+
+    """
+    if np.shape(x) != np.shape(y):
+        raise ValueError('Shape of x and y must be the same')
+
+    x3 = y*2/np.sqrt(3)
+    x2 = x-x3/2
+    x1 = 1-x2-x3
+    return x1, x2, x3
+
+
+def polyfit2d(x, y, z, order=2):
+    """
+    Use polynominal function to fit a surface in 3D.
+    Polynominal function = sum(x^i * y^j), where i+j <= order.
+
+    Parameters
+    ----------
+    x, y : 1d-array
+        (x, y) coordinates data, can be any location at 2D scale.
+    z : 1d-array
+        z coordinates data coresponding to (x, y).
+    order : int, optional
+        Order of the polynominal function, default value = 2.
+
+    Returns
+    -------
+    m : list
+        Coefficients of the polynominal function.
+
+    """
+    ncols = (order + 1)**2
+    G = np.zeros((x.size, ncols))
+    ij = itertools.product(range(order+1), range(order+1))
+    ij = [k for k in ij if sum(k) <= order]
+    for k, (i, j) in enumerate(ij):
+        G[:, k] = x**i * y**j
+    m, _, _, _ = np.linalg.lstsq(G, z, rcond=-1)
+    return m
+
+
+def polyval2d(x, y, m):
+    """
+    Back-calculation of polyfit2d
+
+    Parameters
+    ----------
+    x, y : 1d-array
+        (x, y) coordinates data, can be any location at 2D scale.
+    m : list
+        Coefficients of the polynominal function.
+    z : 1d-array
+        z coordinates data coresponding to (x, y).
+
+    Returns
+    -------
+    z : 1d-array
+        z coordinates data coresponding to (x, y).
+
+    """
+    order = int(np.sqrt(len(m))) - 1
+    ij = itertools.product(range(order+1), range(order+1))
+    ij = [k for k in ij if sum(k) <= order]
+    z = np.zeros_like(x)
+    for a, (i, j) in zip(m, ij):
+        z += a * x**i * y**j
+    return z
+
+
+def cross(a, b, p):
+    """
+    Find the cross coordinates (x, y) of vector a and p+b
+
+    Parameters
+    ----------
+    a, b, p : list with length of 2
+        2D vectors
+
+    Returns
+    -------
+    c : list with length of 2
+        coordinates of the cross points. If no cross then return -1.
+
+    """
+    A = np.array([[a[1], -a[0]], [b[1], -b[0]]])
+    B = np.array([0, b[1]*p[0]-b[0]*p[1]])
+    if np.linalg.det(A) == 0:
+        return -1
+    c = np.linalg.solve(A, B)
+    if (c[0]-a[0])*c[0] <= 0 and (c[0]-p[0])*(c[0]-p[0]-b[0]) <= 0:
+        return list(c)
+    else:
+        return -1
+
+
+def findcross(profile1, profile2):
+    """
+    Find the cross composition of two ternary diffusion paths.
+
+    Parameters
+    ----------
+    profile1, profile2 : Profile1D
+        Two 1D diffusion profiles of the same ternary system
+
+    Returns
+    -------
+    list of cross compositions
+
+    """
+    l1x, l1y = profile1.X1, profile1.X2
+    l2x, l2y = profile2.X1, profile2.X2
+    result = []
+
+    for i in range(1, len(l1x)):
+        for j in range(1, len(l2x)):
+            if min(l1x[i-1:i+1]) > max(l2x[j-1:j+1]) or min(l2x[j-1:j+1]) > max(l1x[i-1:i+1]):
+                continue
+            elif min(l1y[i-1:i+1]) > max(l2y[j-1:j+1]) or min(l2y[j-1:j+1]) > max(l1y[i-1:i+1]):
+                continue
+            o = np.array([l1x[i-1], l1y[i-1]])
+            a = np.array([l1x[i], l1y[i]])
+            p = np.array([l2x[j-1], l2y[j-1]])
+            b = np.array([l2x[j], l2y[j]])
+            a, p, b = a-o, p-o, b-p
+            r = cross(a, b, p)
+            if r != -1:
+                result += [[r[0]+o[0], r[1]+o[1]]]
+    return result
+
+
+def DTcalc(profile1, profile2, time):
+    """
+    Calculate the D matrix according to 2 1D ternary diffusion profiles.
+
+    Parameters
+    ----------
+    profile1, profile2 : Profile1D
+        Two 1D diffusion profiles or a ternary system.
+    time : float
+        Diffusion time in seconds.
+
+    Returns
+    -------
+    cp : list of 2
+        Cross of 2 diffusion paths.
+    D : array of shape (2, 2)
+        Calculated diffusion matrix at cp: [D11, D12; D21, D22]
+
+    """
+    d1, x1, y1 = profile1.dis.copy(), profile1.X1.copy(), profile1.X2.copy()
+    d2, x2, y2 = profile2.dis.copy(), profile2.X1.copy(), profile2.X2.copy()
+
+    cp = findcross(x1, y1, x2, y2)[0]
+
+    f1, f2 = disfunc(d1, x1), disfunc(d2, x2)
+
+    loc1 = float(splev(cp[0], f1))
+    loc2 = float(splev(cp[0], f2))
+
+    # Calculate concentration gradients
+    g1x = float(splev(loc1, splrep(d1, x1, k=1), 1))
+    g1y = float(splev(loc1, splrep(d1, y1, k=1), 1))
+    g2x = float(splev(loc2, splrep(d2, x2, k=1), 1))
+    g2y = float(splev(loc2, splrep(d2, y2, k=1), 1))
+
+    # Linear equations to solve
+    A = np.array([[g1x, g1y, 0, 0],
+                  [0, 0, g1x, g1y],
+                  [g2x, g2y, 0, 0],
+                  [0, 0, g2x, g2y]])*-1e6
+    B = np.array([Jflux(d1, x1, loc1, time),
+                  Jflux(d1, y1, loc1, time),
+                  Jflux(d2, x2, loc2, time),
+                  Jflux(d2, y2, loc2, time)])
+
+    D = np.linalg.solve(A, B)
+    D = np.array([D[:2], D[2:]])
+
+    return cp, D
