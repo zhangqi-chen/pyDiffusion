@@ -3,6 +3,7 @@ The plot module provides support for visualization of diffusion profile data
 and diffusion coefficients data using matplotlib.
 """
 
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splev
@@ -211,3 +212,47 @@ def DCplot(diffsys, ax=None, err=None, **kwargs):
     plt.tight_layout()
 
     return ax
+
+
+def colorcalc(X1, X2, r=1):
+    """
+    Calculate RGB color based on ternary compositions.
+
+    Parameters
+    ----------
+    X1, X2 : array-like
+        Composition 2D arrays.
+        X1 = 1 corresponds to red.
+        X2 = 1 corresponds to green.
+        X1 = X2 = 0 corresponds to blue.
+    r : float, >0
+        r controls the color sensitivity to compositions.
+        Higher r, higher sensitivity.
+
+    """
+    X1[X1 < 0], X2[X2 < 0] = 0, 0
+    X1[X1 > 1], X2[X2 > 1] = 1, 1
+    X3 = 1-X1-X2
+    c1, c2, c3 = np.copy(X1), np.copy(X2), np.copy(X3)
+    for i, (x1, x2, x3) in enumerate(itertools.permutations([X1, X2, X3])):
+        ip = (x1 <= x2) & (x2 <= x3) & (x3 < 1)
+        x, y = x3[ip]+.5*x1[ip], x1[ip]*3**.5/2
+        p = (x-.5)/.5
+        q = (.5-p**r)/(1-x)
+        xn, yn = 1-q*(1-x), y*q
+        a, b, c = yn*2/3**.5, 1-xn-yn/3**.5, xn-yn/3**.5
+        if i == 0:
+            c1[ip], c2[ip], c3[ip] = a, b, c
+        elif i == 1:
+            c1[ip], c3[ip], c2[ip] = a, b, c
+        elif i == 2:
+            c2[ip], c1[ip], c3[ip] = a, b, c
+        elif i == 3:
+            c2[ip], c3[ip], c1[ip] = a, b, c
+        elif i == 4:
+            c3[ip], c1[ip], c2[ip] = a, b, c
+        else:
+            c3[ip], c2[ip], c1[ip] = a, b, c
+    color = np.stack([c1, c2, c3], axis=2)
+    e = 1/color.max(2)
+    return color*np.stack([e, e, e], axis=2)

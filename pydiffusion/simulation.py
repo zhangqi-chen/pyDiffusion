@@ -272,8 +272,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
                 else:
                     Xs[Ip[i]] = splev(dis[Ip[i]],
                                       splrep([If[i], dis[Ip[i]+1]],
-                                             [Xr[i, 0], Xs[Ip[i]+1]], k=1)
-                                      )
+                                             [Xr[i, 0], Xs[Ip[i]+1]], k=1))
             elif If[i] > dis[Ip[i]]:
                 Ip[i] += 1
                 if If[i-1] > dis[Ip[i]-2]:
@@ -282,8 +281,7 @@ def mphSim(profile, diffsys, time, liquid=0, output=True, name=''):
                 else:
                     Xs[Ip[i]-1] = splev(dis[Ip[i]-1],
                                         splrep([dis[Ip[i]-2], If[i]],
-                                               [Xs[Ip[i]-2], Xr[i-1, 1]], k=1)
-                                        )
+                                               [Xs[Ip[i]-2], Xr[i-1, 1]], k=1))
 
         if output and np.mod(m, 3e4) == 0:
             print('%.3f/%.3f hrs simulated' % (t/3600, time/3600))
@@ -437,6 +435,22 @@ def T1DsphSim(profile, tsys, time, name=''):
     """
     1D diffusion simulation of single-phase ternary system.
 
+    Parameters
+    ----------
+    profile : Profile1D
+        Initial profile before simulation.
+    tsys : TSystem
+        Diffusion coefficients.
+    time : float
+        Diffusion time in seconds.
+    name : str
+        Name the output profile.
+
+    Returns
+    -------
+    Profile1D
+        Final diffusion profile.
+
     """
     if name == '':
         name = tsys.name+'_%.1fh' % (time/3600)
@@ -491,6 +505,22 @@ def T1DsphSim(profile, tsys, time, name=''):
 def T2DsphSim(profile, tsys, time, name=''):
     """
     2D diffusion simulation of single-phase ternary system.
+
+    Parameters
+    ----------
+    profile : Profile2D
+        Initial profile before simulation.
+    tsys : TSystem
+        Diffusion coefficients.
+    time : float
+        Diffusion time in seconds.
+    name : str
+        Name the output profile.
+
+    Returns
+    -------
+    Profile2D
+        Final diffusion profile.
 
     """
     if name == '':
